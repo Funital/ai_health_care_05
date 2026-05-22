@@ -21,6 +21,7 @@
 ## 📂 디렉토리 구조 (Directory Structure)
 ```text
 ├── 📂 ml/                  # 머신러닝 알고리즘 및 헬스케어 데이터 모델링 코드
+|   ├── optuna_diabetes.ipynb
 │   ├── shap_diabetes.ipynb
 │   └── stacking_diabetes.py
 # 💡 새로운 학습 주제(데이터 분석, 딥러닝 등)가 추가되면 아래에 확장해 나갈 예정입니다.
