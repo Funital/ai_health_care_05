@@ -29,4 +29,6 @@
 |   ├── breast_cancer_ml.ipynb
 │   ├── iris_DBSCAN.ipynb
 |   └── iris_meanshift.ipynb
+├── 📂 project/                  # 머신러닝 예측 모델 프로젝트
+|   └── pregnancy_success_infertility_ml.ipynb
 # 💡 새로운 학습 주제(데이터 분석, 딥러닝 등)가 추가되면 아래에 확장해 나갈 예정입니다.
