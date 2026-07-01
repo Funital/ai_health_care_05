@@ -20,15 +20,27 @@
 
 ## 📂 디렉토리 구조 (Directory Structure)
 ```text
-├── 📂 ml_study/                  # 머신러닝 알고리즘 및 헬스케어 데이터 모델링 코드
-|   ├── optuna_diabetes.ipynb
-│   ├── shap_diabetes.ipynb
-│   ├── stacking_diabetes.ipynb
-|   └── wine_gmm_clustering.ipynb
-├── 📂 assignment/                  # 머신러닝 알고리즘 학습 과제
-|   ├── breast_cancer_ml.ipynb
-│   ├── iris_DBSCAN.ipynb
-|   └── iris_meanshift.ipynb
-├── 📂 project/                  # 머신러닝 예측 모델 프로젝트
-|   └── pregnancy_success_infertility_ml.ipynb
+ai_health_care_05/
+├── 📂 ml_study/                        # 머신러닝 알고리즘 및 헬스케어 데이터 모델링 코드
+│   ├── optuna_diabetes.ipynb           # Optuna를 활용한 당뇨병 하이퍼파라미터 튜닝
+│   ├── shap_diabetes.ipynb             # SHAP을 활용한 당뇨병 모델 해석
+│   ├── stacking_diabetes.ipynb         # 스태킹 앙상블 기반 당뇨병 예측
+│   └── wine_gmm_clustering.ipynb       # GMM 클러스터링을 활용한 와인 분류
+├── 📂 assignment/                      # 머신러닝 알고리즘 학습 과제
+│   ├── breast_cancer_ml.ipynb          # 유방암 데이터 머신러닝 분류
+│   ├── iris_DBSCAN.ipynb               # DBSCAN 클러스터링 (Iris 데이터셋)
+│   └── iris_meanshift.ipynb            # Mean Shift 클러스터링 (Iris 데이터셋)
+├── 📂 project/                         # 머신러닝 예측 모델 프로젝트
+│   └── pregnancy_success_infertility_ml.ipynb  # 난임 시술 임신 성공 예측 모델
+├── 📂 algorithm/                       # 알고리즘 문제 풀이 (Python)
+│   ├── 📂 Greedy/
+│   │   └── greedy.py                   # 그리디 알고리즘 풀이
+│   └── 📂 Implement/
+│       └── implement.py                # 구현 알고리즘 풀이
+├── 📂 web_study/                       # 웹 기초 학습
+│   ├── index.html
+│   └── style.css
+├── 📂 git_summarize/                   # Git 학습 정리
+│   └── summarize.md
+└── README.md
 # 💡 새로운 학습 주제(데이터 분석, 딥러닝 등)가 추가되면 아래에 확장해 나갈 예정입니다.
