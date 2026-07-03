@@ -47,7 +47,21 @@ header.card{
   color:var(--muted);
 }
 .card-tag .status{color:var(--teal); font-weight:600;}
-.card-body{padding:36px 32px 30px;}
+.card-body{
+  padding:36px 32px 30px;
+  display:flex;
+  align-items:flex-start;
+  gap:32px;
+}
+.card-body-text{flex:1;}
+.profile{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--line);
+  flex-shrink:0;
+}
 .role-eyebrow{
   font-family:var(--mono);
   font-size:13px;
@@ -197,6 +211,10 @@ footer{
   .stat:nth-child(2){border-right:none;}
   .project, .tl-item{grid-template-columns:1fr;}
   .proj-date, .tl-date{padding-top:0;}
+  .card-body{flex-direction:column; align-items:center; text-align:center; gap:20px;}
+  .card-body-text{width:100%;}
+  .contact-row{justify-content:center;}
+  .profile{width:90px; height:90px;}
 }
 
 /* ---------- VISITOR FORM ---------- */
