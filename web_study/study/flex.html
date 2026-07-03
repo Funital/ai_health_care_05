@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML & CSS 테스트 페이지</title>
+
+    <style>
+        .container {
+            /* display: flex; 라고 해주면 가로로 나란히 배치됨. inline요소 처럼. */
+            display: flex;
+            /* 아이템 간의 간격을 설정 */
+            gap: 10px;  
+            justify-content: center; /* 아이템들을 일괄적으로 정렬 */
+        }
+
+        .item {
+            width: 100px;
+            height: 100px;
+            background-color: lightblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            border: 1px solid black;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="item">A</div>
+        <div class="item">B</div>
+        <div class="item">C</div>
+    </div>
+</body>
+</html>
