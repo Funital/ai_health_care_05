@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>흉부 X-ray 폐렴 분류 — 포트폴리오 · 한금준</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --film:#0A1019;        /* dark reading room */
+    --film-2:#0F1826;      /* lifted panel */
+    --film-3:#152234;      /* hairline / raised */
+    --bone:#E9F1F7;        /* bone-white text (bright x-ray) */
+    --bone-dim:#9FB3C6;    /* secondary slate */
+    --bone-faint:#5E7085;  /* captions */
+    --cyan:#4FC8D6;        /* clinical annotation accent */
+    --cyan-deep:#2A8E9B;
+    --signal:#F0A939;      /* risk / FN caution — semantic only */
+    --line:rgba(159,179,198,.14);
+    --line-2:rgba(159,179,198,.28);
+    --glow:rgba(79,200,214,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    background:var(--film);
+    color:var(--bone);
+    font-family:"IBM Plex Sans KR",system-ui,sans-serif;
+    font-size:17px;line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 32px}
+  a{color:var(--cyan);text-decoration:none}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:2px}
+
+  /* ---------- eyebrow / section number ---------- */
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--cyan);
+    display:inline-flex;align-items:center;gap:10px;margin-bottom:22px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--cyan);opacity:.7}
+
+  h2{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:clamp(28px,4vw,42px);
+     line-height:1.08;letter-spacing:-.015em;margin-bottom:18px}
+  h3{font-family:"Space Grotesk",sans-serif;font-weight:500;font-size:19px;letter-spacing:-.01em;
+     margin:0 0 8px;color:var(--bone)}
+  p{color:var(--bone-dim);margin-bottom:16px}
+  p strong,li strong{color:var(--bone);font-weight:600}
+  em{font-style:normal;color:var(--cyan);font-weight:500}
+
+  /* ---------- HERO / viewport ---------- */
+  header{position:relative;padding:96px 0 64px;border-bottom:1px solid var(--line)}
+  .viewport{
+    position:relative;border:1px solid var(--line-2);border-radius:4px;
+    background:
+      radial-gradient(120% 90% at 50% 8%, rgba(79,200,214,.10), transparent 60%),
+      radial-gradient(140% 120% at 50% 120%, rgba(20,34,52,.9), var(--film-2));
+    padding:clamp(30px,5vw,64px) clamp(24px,4vw,56px);
+    overflow:hidden;
+  }
+  .viewport::after{ /* faint scan lines */
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.012) 3px 4px);
+  }
+  .corner{position:absolute;font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.08em;color:var(--bone-faint);line-height:1.7}
+  .corner b{color:var(--cyan);font-weight:500}
+  .c-tl{top:16px;left:18px}.c-tr{top:16px;right:18px;text-align:right}
+  .c-bl{bottom:16px;left:18px}.c-br{bottom:16px;right:18px;text-align:right}
+  .hero-inner{position:relative;z-index:2;max-width:760px;margin:0 auto;text-align:center;
+    padding:44px 0 40px}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--cyan);margin-bottom:26px}
+  h1{font-family:"Space Grotesk",sans-serif;font-weight:700;
+     font-size:clamp(30px,5.4vw,58px);line-height:1.06;letter-spacing:-.02em;margin-bottom:20px}
+  h1 .accent{color:var(--cyan)}
+  .hero-sub{color:var(--bone-dim);font-size:clamp(15px,1.6vw,18px);max-width:560px;margin:0 auto 34px}
+  .readout{display:flex;align-items:center;justify-content:center;gap:clamp(14px,4vw,40px);
+    flex-wrap:wrap;font-family:"IBM Plex Mono",monospace}
+  .r-val{font-size:clamp(26px,4vw,40px);font-weight:500;letter-spacing:-.01em}
+  .r-from{color:var(--bone-faint)}.r-to{color:var(--cyan)}
+  .r-arrow{color:var(--bone-faint);font-size:22px}
+  .r-label{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--bone-faint);margin-top:6px}
+  .r-delta{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--signal);
+    border:1px solid rgba(240,169,57,.4);border-radius:999px;padding:5px 13px;letter-spacing:.04em}
+
+  /* ---------- sections ---------- */
+  section{padding:82px 0;border-bottom:1px solid var(--line)}
+  .lead{font-size:clamp(18px,2vw,21px);line-height:1.62;color:var(--bone);max-width:760px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:8px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+
+  /* stat cards */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:30px}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--film-2);padding:22px 20px}
+  .stat .num{font-family:"IBM Plex Mono",monospace;font-size:27px;font-weight:500;color:var(--bone)}
+  .stat .num.cy{color:var(--cyan)}
+  .stat .cap{font-size:12.5px;color:var(--bone-faint);margin-top:6px;line-height:1.5}
+
+  /* paradox callout */
+  .callout{border:1px solid var(--line-2);border-left:2px solid var(--cyan);
+    background:linear-gradient(90deg,var(--glow),transparent 40%),var(--film-2);
+    border-radius:4px;padding:26px 28px;margin-top:28px}
+  .callout.warn{border-left-color:var(--signal);
+    background:linear-gradient(90deg,rgba(240,169,57,.10),transparent 40%),var(--film-2)}
+  .callout .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--cyan);margin-bottom:10px}
+  .callout.warn .tag{color:var(--signal)}
+  .callout p:last-child{margin-bottom:0}
+
+  /* instrument list */
+  .rows{border-top:1px solid var(--line);margin-top:26px}
+  .row{display:grid;grid-template-columns:180px 1fr;gap:24px;padding:18px 0;
+    border-bottom:1px solid var(--line)}
+  @media(max-width:640px){.row{grid-template-columns:1fr;gap:6px}}
+  .row .k{font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--cyan);padding-top:2px}
+  .row .v{color:var(--bone-dim);font-size:15.5px}
+  .row .v b{color:var(--bone)}
+
+  /* rationale axis blocks */
+  .axis{border:1px solid var(--line);border-radius:4px;background:var(--film-2);
+    padding:24px 26px;margin-top:20px}
+  .axis .axtag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--cyan-deep);color:var(--cyan);margin-bottom:6px}
+  .axis p{margin-bottom:0;font-size:15.5px}
+
+  /* journey timeline (sequence device) */
+  .journey{margin-top:34px;display:flex;flex-direction:column;gap:2px}
+  .jstep{display:grid;grid-template-columns:200px 1fr 96px;align-items:center;gap:18px;
+    padding:15px 20px;background:var(--film-2);border:1px solid var(--line);border-radius:3px;
+    position:relative}
+  @media(max-width:720px){.jstep{grid-template-columns:1fr 84px;gap:6px 14px}
+    .jstep .jbar-wrap{grid-column:1/-1;order:3}}
+  .jstep .jname{font-size:14.5px;color:var(--bone)}
+  .jstep .jname small{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;
+    color:var(--bone-faint);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+  .jbar-wrap{height:8px;background:var(--film-3);border-radius:999px;overflow:hidden}
+  .jbar{height:100%;background:linear-gradient(90deg,var(--cyan-deep),var(--cyan));border-radius:999px;
+    width:0;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+  @media(prefers-reduced-motion:reduce){.jbar{transition:none}}
+  .jscore{font-family:"IBM Plex Mono",monospace;font-size:17px;text-align:right;color:var(--bone)}
+  .jstep.final .jscore{color:var(--cyan)}
+  .jstep.final{border-color:var(--line-2)}
+
+  /* differential diagnosis table */
+  .ddx{width:100%;border-collapse:collapse;margin-top:26px;font-size:14.5px}
+  .ddx caption{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:12px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--signal);margin-bottom:14px}
+  .ddx th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--bone-faint);font-weight:400;
+    padding:0 14px 10px;border-bottom:1px solid var(--line-2)}
+  .ddx td{padding:13px 14px;border-bottom:1px solid var(--line);color:var(--bone-dim);vertical-align:top}
+  .ddx td.exp{color:var(--bone)}
+  .ddx td.sc{font-family:"IBM Plex Mono",monospace;color:var(--bone)}
+  .ddx tr:hover td{background:var(--film-2)}
+
+  /* confusion matrix + gradcam grid */
+  .cm{display:inline-grid;grid-template-columns:auto auto auto;gap:1px;background:var(--line);
+    border:1px solid var(--line);margin-top:8px}
+  .cm div{background:var(--film-2);padding:14px 18px;font-family:"IBM Plex Mono",monospace;
+    font-size:14px;text-align:center;min-width:74px}
+  .cm .hd{color:var(--bone-faint);font-size:11px;letter-spacing:.08em;background:var(--film)}
+  .cm .tp{color:var(--cyan)}.cm .tn{color:var(--cyan)}
+  .cm .fn{color:var(--signal)}.cm .fp{color:var(--bone-dim)}
+
+  /* retrospective */
+  .retro{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}
+  @media(max-width:720px){.retro{grid-template-columns:1fr}}
+  .retro .card{border:1px solid var(--line);border-radius:4px;background:var(--film-2);padding:24px 26px}
+  .retro .card h3{margin-bottom:10px}
+  .retro .card p{font-size:15px;margin-bottom:0}
+  .retro .card.good h3::before{content:"◤ ";color:var(--cyan)}
+  .retro .card.grow h3::before{content:"◢ ";color:var(--signal)}
+
+  .synthesis{border:1px solid var(--line-2);border-radius:4px;padding:32px 34px;margin-top:34px;
+    background:radial-gradient(120% 140% at 0% 0%, var(--glow), transparent 55%),var(--film-2)}
+  .synthesis p{color:var(--bone);font-size:16.5px;margin-bottom:0}
+
+  ul.clean{list-style:none;margin-top:6px}
+  ul.clean li{position:relative;padding-left:22px;margin-bottom:10px;color:var(--bone-dim);font-size:15.5px}
+  ul.clean li::before{content:"—";position:absolute;left:0;color:var(--cyan)}
+
+  footer{padding:56px 0 72px;text-align:center}
+  footer .sig{font-family:"Space Grotesk",sans-serif;font-size:18px;color:var(--bone)}
+  footer .meta{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;
+    color:var(--bone-faint);margin-top:10px}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="viewport">
+      <div class="corner c-tl">STUDY&nbsp;&nbsp;<b>CHEST&nbsp;X-RAY</b><br>MODALITY&nbsp;&nbsp;DR / PA<br>TASK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BINARY&nbsp;CLASSIFY</div>
+      <div class="corner c-tr">MODEL&nbsp;&nbsp;<b>ResNet18</b><br>PARAMS&nbsp;transfer / LS 0.1<br>SEEDS&nbsp;&nbsp;42 · 100 · 2026</div>
+      <div class="corner c-bl">TRAIN&nbsp;5,216<br>TEST&nbsp;&nbsp;624<br>CLASS&nbsp;0=정상 · 1=폐렴</div>
+      <div class="corner c-br">ACC&nbsp;&nbsp;<b>0.9853</b><br>SENS&nbsp;0.9837<br>SPEC&nbsp;0.9900</div>
+
+      <div class="hero-inner">
+        <div class="kicker">Radiology · Deep Learning Portfolio</div>
+        <h1>검증 성능이 아니라<br><span class="accent">일반화 격차</span>를 문제로 재정의했다</h1>
+        <p class="hero-sub">흉부 X-ray 폐렴 분류. 점수를 올리는 것보다, 0.94에서 멈추는 <em>이유</em>를 단일 변수 실험으로 진단한 프로젝트.</p>
+        <div class="readout">
+          <div><span class="r-val r-from">0.7964</span><span class="r-label">baseline · test</span></div>
+          <span class="r-arrow mono">→</span>
+          <div><span class="r-val r-to">0.9439</span><span class="r-label">final · leaderboard</span></div>
+          <span class="r-delta mono">Δ +0.147</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- 01 개요 -->
+<section id="overview">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">01 / 개요 · Reading</div>
+    <h2>진단은 숫자가 아니라 방향에서 시작한다</h2>
+    <p class="lead">ImageNet 사전학습 ResNet18을 전이학습해 흉부 X-ray를 정상/폐렴으로 분류했다. 최초 baseline은 검증 성능이 높았지만 리더보드에서 0.7964로 급락했고, 이 <em>검증↔리더보드 괴리</em>를 출발점으로 삼았다.</p>
+    <p>전이학습으로 0.9407, Label Smoothing과 시드 앙상블로 0.9439에 안착시켰다. 그러나 이 프로젝트의 실질적 성과는 점수가 아니라 <strong>“왜 0.94에서 정체되는가”를 규명한 과정</strong>에 있다. 해상도·대비 정규화·증강·최적화 등 8개 축을 한 번에 하나씩만 바꾸는 단일 변수 실험으로, 병목이 모델 표현력이나 과적합이 아니라 <strong>train과 test 사이의 구조적 분포 차이</strong>임을 근거와 함께 좁혀갔다. Grad-CAM으로 판단 근거까지 검증해, 성능을 올리는 과정에서 한계를 이해하는 문제 해결 흐름을 완성했다.</p>
+  </div>
+</section>
+
+<!-- 02 배경 & 문제정의 -->
+<section id="problem">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">02 / 배경 &amp; 문제 정의 · Presenting Problem</div>
+    <h2>높은 검증 성능이 “쓸 수 있다”를 보장하지 않는다</h2>
+    <div class="grid2">
+      <p>흉부 X-ray 폐렴 판독은 반복적·시간 소모적이며 판독 지연은 곧 위험이다. baseline(SimpleCNN)은 검증 AUC 0.992를 기록하고도 test에서 0.7964로 무너졌다. 같은 출처의 train/val은 잘 맞추지만 test에서 급락한다는 것은, 문제가 성능 부족이 아니라 <strong>일반화 격차</strong>임을 가리킨다.</p>
+      <p>이 재정의가 이후 모든 실험 설계의 기준이 되었다. “성능을 더 짜낸다”가 아니라 “분포 차이를 좁힌다”가 진짜 과제였고, 규제·증강처럼 train↔val 내부만 건드리는 기법은 이 격차를 줄이지 못하리라는 가설을 세웠다.</p>
+    </div>
+    <div class="callout warn">
+      <div class="tag mono">The paradox</div>
+      <p><strong>Validation AUC 0.9920</strong> — 내부 데이터는 거의 완벽하게 분류. 그런데 <strong>Leaderboard 0.7964</strong>. 이 두 숫자의 공존이 “과적합”이 아니라 “분포 shift”라는 진단의 첫 단서였다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 데이터 -->
+<section id="data">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">03 / 사용 데이터 · Study Data</div>
+    <h2>Kermany 흉부 X-ray — 불균형과 분포 shift가 내재된 데이터</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">5,216</div><div class="cap">Train 이미지</div></div>
+      <div class="stat"><div class="num">624</div><div class="cap">Test 이미지 (라벨 비공개)</div></div>
+      <div class="stat"><div class="num cy">2.89:1</div><div class="cap">폐렴 : 정상 (train)</div></div>
+      <div class="stat"><div class="num cy">74% → 62%</div><div class="cap">폐렴 비율 train → test</div></div>
+    </div>
+    <div class="grid2" style="margin-top:34px">
+      <div>
+        <h3>형식과 전처리</h3>
+        <p>단일 채널 흉부 X-ray. 전이학습을 위해 grayscale→3채널로 확장, ImageNet mean/std 정규화, 224×224 리사이즈. 학습셋의 약 74%가 폐렴이라 다수 클래스 편향과 Accuracy 왜곡을 유발한다.</p>
+      </div>
+      <div>
+        <h3>핵심 특성 — 분포 shift</h3>
+        <p>train은 폐렴 비율이 높은 데 비해 test는 정상 비율이 상대적으로 높다. 이 <em>train↔test 출력 분포 차이</em>가 리더보드 정체의 구조적 배경이 되었다.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="tag mono">Domain rule</div>
+      <p>흉부 X-ray는 심장이 좌측에 있는 등 <strong>좌우 비대칭이 의학적으로 유의미</strong>하다. 일반 이미지에서 흔한 좌우반전(HFlip) 증강은 의도적으로 배제했다 — 데이터의 도메인 지식이 증강 설계를 결정한 사례.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 기술 스택 -->
+<section id="stack">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">04 / 기술 스택 · Instruments</div>
+    <h2>판독 워크스테이션을 구성한 도구들</h2>
+    <div class="rows">
+      <div class="row"><div class="k mono">Framework</div><div class="v"><b>PyTorch · torchvision</b> — <code class="mono">models.resnet18</code>, <code class="mono">transforms</code></div></div>
+      <div class="row"><div class="k mono">Model</div><div class="v"><b>ResNet18</b> (ImageNet 사전학습, <code class="mono">layer4</code> + <code class="mono">fc</code>만 fine-tuning)</div></div>
+      <div class="row"><div class="k mono">Loss / Optim</div><div class="v"><b>CrossEntropy(class weight) + Label Smoothing 0.1</b>, Adam(1e-4) + StepLR(step 3, γ 0.5)</div></div>
+      <div class="row"><div class="k mono">Evaluation</div><div class="v"><b>scikit-learn</b> — AUC·Accuracy·Confusion Matrix, Sensitivity / Specificity</div></div>
+      <div class="row"><div class="k mono">Explainability</div><div class="v"><b>Grad-CAM</b> — torch hook 기반 자체 구현(외부 라이브러리 불필요), target <code class="mono">layer4[-1]</code></div></div>
+      <div class="row"><div class="k mono">Environment</div><div class="v"><b>Kaggle Notebook (GPU)</b> · Dacon 리더보드(Accuracy)</div></div>
+      <div class="row"><div class="k mono">Reproducibility</div><div class="v"><b>seed 고정 · Stratified split · 시드 앙상블</b> (42 / 100 / 2026)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 기술 선정 이유 -->
+<section id="rationale">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">05 / 기술 선정 이유 · Rationale</div>
+    <h2>모든 선택을 데이터 · 모델 · 학습 축으로 분류했다</h2>
+    <p class="lead">“좋아 보여서”가 아니라, 각 기법이 어느 축의 어떤 문제를 겨냥하는지 명시했다.</p>
+    <div class="axis">
+      <div class="axtag mono">Model axis — 전이학습</div>
+      <h3>ResNet18, <code class="mono">layer4</code> + <code class="mono">fc</code>만 학습</h3>
+      <p>소량·분포편향 데이터에서 “더 복잡한 모델”보다 “좋은 사전학습 특징의 도메인 적응”이 robustness에 결정적이라 판단. 초기 블록은 동결(저수준 에지·텍스처 재사용, 과적합 방지), 상위 표현과 헤드만 학습. LR 1e-4로 가중치 보호. ResNet50·DenseNet121은 데이터 대비 과적합·무이득으로 기각.</p>
+    </div>
+    <div class="axis">
+      <div class="axtag mono">Data axis — 증강 + 정규화</div>
+      <h3>약한 기하/광도 증강, HFlip 제외</h3>
+      <p>회전·이동·스케일·약한 밝기/대비로 다양성 확보하되 좌우반전은 의학적 이유로 배제. SMOTE는 이미지에 부적합해 class weight로 대체.</p>
+    </div>
+    <div class="axis">
+      <div class="axtag mono">Learning axis — 불균형 보정 + LS</div>
+      <h3>class weight + Label Smoothing 0.1</h3>
+      <p>2.89:1 불균형을 class weight로 보정하고, 과확신을 완화하는 Label Smoothing으로 0.9407→0.9423. smoothing 0.05는 비단조 반응 → 강한 신호가 아님을 확인.</p>
+    </div>
+    <div class="axis">
+      <div class="axtag mono">Variance axis — 시드 앙상블</div>
+      <h3>세 시드 확률 평균 (풀 데이터 유지)</h3>
+      <p>실측 노이즈(±0.014) 안에서 상단에 안착(0.9439). 각 모델이 <em>풀 데이터</em>를 보는 점이, train 80%만 보는 5-Fold보다 개별 성능을 지켜 유리했다.</p>
+    </div>
+    <div class="callout">
+      <div class="tag mono">Evaluation protocol</div>
+      <p>이 데이터에서 val AUC는 ≈0.999로 <strong>포화</strong>돼 변별력이 없다. 포화 구간에서 AUC로 best epoch를 고르면 정작 리더보드 지표인 Accuracy가 나쁜 에포크가 뽑힌다 — 그래서 <strong>실제 채점 기준인 ACC를 체크포인트 선택 기준</strong>으로 삼았다. 지표 선택은 실험 이전에 확정할 설계 결정임을 배운 지점.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 06 결과 & 인사이트 -->
+<section id="findings">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">06 / 결과 &amp; 인사이트 · Findings</div>
+    <h2>무엇이 병목이 아닌지를 반증으로 좁혔다</h2>
+
+    <h3 style="margin-top:8px">리더보드 여정 <span class="mono" style="font-size:12px;color:var(--bone-faint);letter-spacing:.1em">— BEFORE / AFTER</span></h3>
+    <div class="journey">
+      <div class="jstep"><div class="jname">SimpleCNN <small>baseline</small></div><div class="jbar-wrap"><div class="jbar" data-w="17"></div></div><div class="jscore">0.7964</div></div>
+      <div class="jstep"><div class="jname">ResNet18 전이학습 <small>model axis · +0.144</small></div><div class="jbar-wrap"><div class="jbar" data-w="88"></div></div><div class="jscore">0.9407</div></div>
+      <div class="jstep"><div class="jname">+ Label Smoothing 0.1 <small>loss axis</small></div><div class="jbar-wrap"><div class="jbar" data-w="92"></div></div><div class="jscore">0.9423</div></div>
+      <div class="jstep final"><div class="jname">+ 시드 앙상블 <small>variance axis · final</small></div><div class="jbar-wrap"><div class="jbar" data-w="100"></div></div><div class="jscore">0.9439</div></div>
+    </div>
+
+    <table class="ddx">
+      <caption>Differential diagnosis — 기각된 시도 (모두 단일 변수)</caption>
+      <thead><tr><th>시도</th><th>축</th><th>리더보드</th><th>원인</th></tr></thead>
+      <tbody>
+        <tr><td class="exp">해상도 320</td><td>픽셀</td><td class="sc">0.9327</td><td>미세 신호 강화가 오히려 출처 의존↑</td></tr>
+        <tr><td class="exp">CLAHE</td><td>픽셀</td><td class="sc">0.9231</td><td>대비 정규화가 출처별 고주파 증폭 → 격차 확대</td></tr>
+        <tr><td class="exp">증강 강화</td><td>증강</td><td class="sc">0.9295</td><td>val은 최고(0.999)인데 하락</td></tr>
+        <tr><td class="exp">Label Smoothing 0.05</td><td>손실</td><td class="sc">0.9375</td><td>비단조 → 약한 신호</td></tr>
+        <tr><td class="exp">AdamW + OneCycleLR</td><td>최적화</td><td class="sc">0.9215</td><td>LR 변동↑ → best가 FN 많은 에포크 선택</td></tr>
+        <tr><td class="exp">SAM</td><td>학습기법</td><td class="sc">0.9359</td><td>안정 학습됐으나 shift는 못 줄임</td></tr>
+        <tr><td class="exp">5-Fold 앙상블</td><td>분산</td><td class="sc">0.9343</td><td>각 모델이 train 80%만 봐 개별 성능↓</td></tr>
+      </tbody>
+    </table>
+
+    <div class="grid2" style="margin-top:38px">
+      <div>
+        <h3>최종 검증 지표 <span class="mono" style="font-size:12px;color:var(--bone-faint)">thr=0.5</span></h3>
+        <p style="margin-bottom:14px">Accuracy 0.9853 · Precision 0.9965 · Recall 0.9837 · Specificity 0.9900 · AUC 0.9991</p>
+        <div class="cm">
+          <div class="hd"></div><div class="hd">pred 0</div><div class="hd">pred 1</div>
+          <div class="hd">true 0</div><div class="tn">TN 398</div><div class="fp">FP 4</div>
+          <div class="hd">true 1</div><div class="fn">FN 19</div><div class="tp">TP 1144</div>
+        </div>
+      </div>
+      <div>
+        <h3>Grad-CAM 판독</h3>
+        <p style="font-size:15px">정답 폐렴은 활성화가 <em>양측 폐야 중앙부</em>에 집중된 반면, 실패 FN(실제 폐렴, prob 0.097)은 활성화가 폐야가 아닌 <strong style="color:var(--signal)">가장자리·모서리로 새어나갔다</strong>. “폐를 볼 때는 맞히고, 엉뚱한 곳을 볼 때는 틀린다”가 시각적으로 확인됐다. 단 Grad-CAM은 상관이지 인과가 아니며, 활성화 영역을 crop한 실험이 리더보드를 0.8093으로 떨어뜨린 것이 이를 뒷받침한다.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="tag mono">Core insight</div>
+      <p>절대 개선의 대부분은 <strong>전이학습(+0.144)</strong> — 나머지를 다 합친 것보다 압도적. 그리고 병목은 과적합이 아니라 <strong>train↔test 분포 shift</strong>다. 결정적 단서는 <em>증강을 4배 강화해도 val이 안 떨어진다</em>는 사실 — train↔val 내부엔 애초에 교란할 출처 변동이 없다는 뜻이고, 곧 분포 차이가 문제임을 확정했다. 오분류의 47.8%가 확률 경계(0.4~0.6)에 몰린 점은 test의 본질적 모호성을, ±0.014 노이즈 실측은 측정 한계를 함께 가리킨다. <strong>실패한 실험이 진단을 정교하게 만든 대표 사례다.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 리뷰 -->
+<section id="retro" style="border-bottom:none">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">07 / 프로젝트 리뷰 · Retrospective</div>
+    <h2>점수보다 진단 과정이 역량이었다</h2>
+    <div class="retro">
+      <div class="card good">
+        <h3>문제 재정의</h3>
+        <p>검증↔리더보드 괴리를 “성능 부족”이 아닌 “일반화 격차”로 읽은 것이 방향을 결정했다. 오독했다면 모델 크기·에포크를 늘리는 데 시간을 낭비했을 것이다.</p>
+      </div>
+      <div class="card good">
+        <h3>단일 변수 규율</h3>
+        <p>한 번에 한 축만 바꿔 인과를 분리했기에, 8번의 기각 실험이 각각 “무엇이 병목이 아닌지”의 증거로 쌓였다. 다섯 기법을 묶었던 초기 실패가 이 규율의 필요성을 각인시켰다.</p>
+      </div>
+      <div class="card good">
+        <h3>정직한 평가 신호</h3>
+        <p>val AUC 포화를 인지하고 리더보드를 최종 판정 신호로, 검증 지표는 안정성 모니터링용으로 분리. 노이즈 폭(±0.014) 안의 변동은 개선으로 취급하지 않았다.</p>
+      </div>
+      <div class="card grow">
+        <h3>아쉬운 점 · 배운 점</h3>
+        <p>분포 shift가 근본 원인이라면 내부 데이터 튜닝은 원리적 한계가 있었다. 더 일찍 확정했다면 외부 데이터로 방향을 틀 수 있었을 것 — 다만 그 확정 자체가 통제된 실패로만 얻어졌다.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:38px">한계와 발전 방향</h3>
+    <ul class="clean">
+      <li><strong>한계</strong> — 학습과 다른 기관·장비 영상에서 민감도 저하 예상. 임상적으로 가장 위험한 오류는 폐렴을 놓치는 FN이므로, 배포 시 도메인 적응·threshold 재보정·정기 재학습 필요.</li>
+      <li><strong>서비스 확장</strong> — 결과 데이터를 <code class="mono">pred_label / probability / risk_level(HIGH≥0.8 · MEDIUM≥0.5 · LOW≥0.2 · NORMAL) / Grad-CAM 근거</code>로 정의해 위험도 우선순위 판독 흐름에 연결.</li>
+      <li><strong>근본 해법</strong> — 외부 데이터로 출처 다양성 확보. 그 외 test-time 도메인 적응, 병변 위치 기반 해석성 강화(SE Block 등).</li>
+    </ul>
+
+    <div class="synthesis">
+      <p>이 프로젝트의 성과는 리더보드 0.9439라는 숫자보다, <strong style="color:var(--bone)">단일 변수 실험을 반복해 정체의 원인을 근거와 함께 좁혀간 문제 해결 과정</strong>에 있다. 점수를 올리는 동시에 모델의 한계를 이해하고, 그 이해를 근거로 데이터와 평가를 다룬 것이 핵심 역량이었다.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="sig">한금준 · 흉부 X-ray 폐렴 분류 프로젝트</div>
+    <div class="meta mono">ResNet18 · Transfer Learning · Single-Variable Ablation · Grad-CAM</div>
+  </div>
+</footer>
+
+<script>
+  // scroll reveal
+  const io = new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // journey bars fill when in view
+  const jio = new IntersectionObserver((es)=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.querySelectorAll('.jbar').forEach(b=>{ b.style.width = b.dataset.w + '%'; });
+        jio.unobserve(e.target);
+      }
+    });
+  },{threshold:.3});
+  document.querySelectorAll('.journey').forEach(el=>jio.observe(el));
+</script>
+</body>
+</html>

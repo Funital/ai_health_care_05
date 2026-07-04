@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>난임 환자 임신 성공률 예측 — 포트폴리오</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D0F14;
+    --bg-card: #141720;
+    --bg-highlight: #1A1E2B;
+    --border: #252A3A;
+    --accent: #4F8EF7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --accent-success: #34C985;
+    --accent-warn: #F5A623;
+    --text-primary: #E8EAF0;
+    --text-secondary: #8A90A0;
+    --text-muted: #525870;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans KR', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.8;
+    padding: 0 1.5rem;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 5rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.2rem;
+  }
+  .hero-sub {
+    color: var(--text-secondary);
+    font-size: 14px;
+    max-width: 560px;
+    line-height: 1.7;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .meta-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .meta-item span { color: var(--text-secondary); }
+
+  /* ── Score Card ── */
+  .score-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin: 2.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .score-cell {
+    background: var(--bg-card);
+    padding: 1.4rem 1.6rem;
+    text-align: center;
+  }
+  .score-val {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--accent-success);
+    display: block;
+    letter-spacing: -0.02em;
+  }
+  .score-val.dim { color: var(--text-secondary); }
+  .score-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.3rem;
+    display: block;
+  }
+
+  /* ── Section ── */
+  section {
+    padding: 3.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.6rem;
+    color: var(--text-primary);
+  }
+  p { color: var(--text-secondary); margin-bottom: 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .card:last-child { margin-bottom: 0; }
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+  .card-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: #0A0C10;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #B8BFCF;
+    margin: 1.2rem 0;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .code-block .kw { color: #79B8FF; }
+  .code-block .str { color: #9ECE6A; }
+  .code-block .cm { color: #525870; font-style: italic; }
+  .code-block .num { color: #F9A825; }
+
+  /* ── Stack grid ── */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stack-cell {
+    background: var(--bg-card);
+    padding: 1.2rem 1.4rem;
+  }
+  .stack-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+  }
+  .stack-role {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ── Timeline ── */
+  .timeline { margin-top: 1rem; }
+  .tl-item {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 1.2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-day {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    padding-top: 2px;
+  }
+  .tl-content { }
+  .tl-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+  }
+  .tl-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .tl-score {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent-success);
+    background: rgba(52,201,133,0.1);
+    border: 1px solid rgba(52,201,133,0.2);
+    border-radius: 4px;
+    padding: 1px 8px;
+    margin-top: 0.4rem;
+  }
+  .tl-score.neutral { color: var(--text-muted); background: var(--bg-highlight); border-color: var(--border); }
+  .tl-score.down { color: var(--accent-warn); background: rgba(245,166,35,0.08); border-color: rgba(245,166,35,0.2); }
+
+  /* ── Insight grid ── */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 600px) {
+    .insight-grid { grid-template-columns: 1fr; }
+    .score-strip { grid-template-columns: 1fr; }
+  }
+  .insight-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.3rem 1.4rem;
+  }
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .insight-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── Review ── */
+  .review-item {
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 1.2rem;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .review-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-top: 2px;
+  }
+  .tag-good { color: var(--accent-success); }
+  .tag-bad  { color: var(--accent-warn); }
+  .tag-next { color: var(--accent); }
+  .review-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+
+  /* ── FI bar ── */
+  .fi-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.6rem;
+    font-size: 12px;
+  }
+  .fi-name { color: var(--text-secondary); width: 180px; flex-shrink: 0; font-family: var(--mono); }
+  .fi-bar-wrap { flex: 1; background: var(--bg-highlight); border-radius: 3px; height: 6px; }
+  .fi-bar { height: 6px; border-radius: 3px; background: var(--accent); }
+  .fi-val { color: var(--text-muted); font-family: var(--mono); font-size: 11px; width: 60px; text-align: right; }
+
+  footer {
+    padding: 2.5rem 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-eyebrow">ML Competition · Team Project · 5조</div>
+    <h1>난임 환자의<br>임신 성공률 예측</h1>
+    <p class="hero-sub">
+      25만 건의 난임 시술 임상 데이터를 기반으로 임신 성공 여부를 예측하는
+      머신러닝 파이프라인을 설계하고 리더보드 상위권을 달성한 팀 프로젝트입니다.
+    </p>
+    <div class="meta-row">
+      <div class="meta-item">기간 <span>2026.05.26 – 06.01</span></div>
+      <div class="meta-item">역할 <span>모델링 · 피처 엔지니어링 · 앙상블 설계</span></div>
+      <div class="meta-item">환경 <span>Google Colab · macOS (M4 Pro)</span></div>
+    </div>
+  </header>
+
+  <!-- Score strip -->
+  <div class="score-strip">
+    <div class="score-cell">
+      <span class="score-val">0.74172</span>
+      <span class="score-label">최고 LB AUC</span>
+    </div>
+    <div class="score-cell">
+      <span class="score-val dim">0.74230</span>
+      <span class="score-label">1위 LB AUC</span>
+    </div>
+    <div class="score-cell">
+      <span class="score-val">256,351</span>
+      <span class="score-label">Train 샘플 수</span>
+    </div>
+  </div>
+
+  <!-- 1. 개요 -->
+  <section>
+    <div class="section-num">01 — Overview</div>
+    <h2>개요</h2>
+    <p>
+      영국 인간수정 및 배아연구원(HFEA)의 실제 난임 시술 기록 데이터를 활용해
+      특정 시술 주기에서 임신이 성공할지 여부를 예측하는 이진 분류 모델을 개발했습니다.
+      평가 지표는 ROC-AUC이며, 데이터의 심각한 클래스 불균형(성공 약 26%)과
+      68개 피처의 혼합 타입(범주형·연속형·순서형)이 핵심 도전 요소였습니다.
+    </p>
+    <p>
+      LightGBM · XGBoost · CatBoost 3개 모델을 10-Fold × 3-Seed OOF 스태킹으로
+      결합하고, Optuna 베이지안 최적화와 OOF 타겟 인코딩을 파이프라인에 통합해
+      최종 LB AUC <strong style="color:var(--accent-success)">0.74172</strong>를 달성했습니다.
+    </p>
+  </section>
+
+  <!-- 2. 배경 & 문제 정의 -->
+  <section>
+    <div class="section-num">02 — Background & Problem</div>
+    <h2>프로젝트 배경 & 문제 정의</h2>
+    <p>
+      난임 시술은 높은 비용과 신체적·심리적 부담을 수반하며, 성공률 예측은
+      환자와 의료진 모두에게 중요한 의사결정 근거가 됩니다.
+      이 프로젝트는 시술 유형, 배아 품질, 나이, 과거 시술 이력 등
+      다양한 임상 변수를 학습해 개별 주기의 임신 성공 확률을 수치화하는 것을 목표로 합니다.
+    </p>
+    <div class="card" style="margin-top:1.4rem">
+      <div class="card-title">핵심 문제</div>
+      <div class="card-body">
+        클래스 불균형(실패 74.2% / 성공 25.8%), 의료 도메인 특유의 구조적 결측치,
+        고카디널리티 범주형 변수의 인코딩 누수 방지가 모델 성능을 결정하는 주요 변수였습니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 데이터 설명 -->
+  <section>
+    <div class="section-num">03 — Data</div>
+    <h2>사용 데이터 설명</h2>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-label">Train</div>
+        <div class="insight-text">256,351건 · 68개 피처<br>임신 성공 여부(0/1) 포함</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">Test</div>
+        <div class="insight-text">90,067건 · 68개 피처<br>확률값(0~1) 예측 후 제출</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">범주형 변수</div>
+        <div class="insight-text">시술 유형, 나이 구간, 시술 횟수 등<br>순서형 + 명목형 혼재</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">수치형 변수</div>
+        <div class="insight-text">배아 수, 난자 수, 경과일 등<br>0값 집중 분포 (의학적 결측)</div>
+      </div>
+    </div>
+    <p style="margin-top:1.4rem">
+      의료 데이터 특성상 결측치를 단순 0으로 대체하면 실제 "시술 미시행"과
+      혼동될 수 있어 도메인 해석을 우선했습니다.
+      배아 이식을 받지 않은 경우 배아 관련 변수가 구조적으로 결측되며,
+      DI 시술 주기에서는 IVF 배아 변수가 의미 없이 비어 있습니다.
+    </p>
+
+    <p style="margin-top:1rem;font-size:13px;color:var(--text-muted)">Top Feature Importance (LightGBM 기준)</p>
+    <div style="margin-top:0.8rem">
+      <div class="fi-row"><span class="fi-name">이식된 배아 수</span><div class="fi-bar-wrap"><div class="fi-bar" style="width:100%"></div></div><span class="fi-val">394K</span></div>
+      <div class="fi-row"><span class="fi-name">effective_maternal_age</span><div class="fi-bar-wrap"><div class="fi-bar" style="width:29%"></div></div><span class="fi-val">115K</span></div>
+      <div class="fi-row"><span class="fi-name">생성 배아 대비 이식률</span><div class="fi-bar-wrap"><div class="fi-bar" style="width:21%"></div></div><span class="fi-val">84K</span></div>
+      <div class="fi-row"><span class="fi-name">이식 시행 여부</span><div class="fi-bar-wrap"><div class="fi-bar" style="width:20%"></div></div><span class="fi-val">81K</span></div>
+      <div class="fi-row"><span class="fi-name">배아 이식 경과일</span><div class="fi-bar-wrap"><div class="fi-bar" style="width:11%"></div></div><span class="fi-val">42K</span></div>
+      <div class="fi-row"><span class="fi-name">이식_5일이상 (파생)</span><div class="fi-bar-wrap"><div class="fi-bar" style="width:5%" style="background:var(--accent-success)"></div></div><span class="fi-val">12K</span></div>
+    </div>
+  </section>
+
+  <!-- 4. 기술 스택 -->
+  <section>
+    <div class="section-num">04 — Stack</div>
+    <h2>기술 스택</h2>
+    <div class="stack-grid">
+      <div class="stack-cell"><div class="stack-name">LightGBM</div><div class="stack-role">베이스 모델 · 주력</div></div>
+      <div class="stack-cell"><div class="stack-name">XGBoost</div><div class="stack-role">베이스 모델</div></div>
+      <div class="stack-cell"><div class="stack-name">CatBoost</div><div class="stack-role">베이스 모델</div></div>
+      <div class="stack-cell"><div class="stack-name">Optuna</div><div class="stack-role">베이지안 하이퍼파라미터 최적화</div></div>
+      <div class="stack-cell"><div class="stack-name">Scikit-learn</div><div class="stack-role">CV · 메타모델 · 평가</div></div>
+      <div class="stack-cell"><div class="stack-name">Pandas / NumPy</div><div class="stack-role">전처리 · 피처 엔지니어링</div></div>
+      <div class="stack-cell"><div class="stack-name">Google Colab</div><div class="stack-role">협업 실행 환경</div></div>
+      <div class="stack-cell"><div class="stack-name">Python 3.11</div><div class="stack-role">메인 언어</div></div>
+    </div>
+  </section>
+
+  <!-- 5. 기술 선정 이유 -->
+  <section>
+    <div class="section-num">05 — Rationale</div>
+    <h2>기술 선정 이유</h2>
+    <div class="card">
+      <div class="card-title">GBDT 3종 앙상블 — LGB · XGB · CatBoost</div>
+      <div class="card-body">
+        탭형 데이터에서 신경망보다 안정적인 성능을 보이는 그래디언트 부스팅 계열을
+        선택했습니다. 3종 모두 결측치와 범주형 변수를 내부적으로 처리하며,
+        서로 다른 트리 성장 알고리즘(Leaf-wise / Depth-wise / Symmetric)으로
+        앙상블 다양성을 확보했습니다.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Optuna TPESampler — GridSearch 대비 효율</div>
+      <div class="card-body">
+        25만 건 × 3모델의 파라미터 공간을 GridSearch로 탐색하면 비현실적인 시간이
+        소요됩니다. Optuna의 베이지안 최적화는 동일한 trial 수에서 더 좋은 파라미터를
+        찾으며, MedianPruner로 저성능 trial을 조기 중단해 시간을 절약했습니다.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">OOF 타겟 인코딩 — 데이터 누수 방지</div>
+      <div class="card-body">
+        범주형 변수에 전체 train 기준 타겟 인코딩을 적용하면 validation fold에
+        타겟 정보가 새어 OOF AUC가 과장됩니다.
+        Fold 내부 train 데이터로만 인코딩 맵을 생성하는 OOF 방식을 적용해
+        실제 LB와의 괴리를 최소화했습니다.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">LogisticRegression 메타모델 — 스태킹 과적합 방지</div>
+      <div class="card-body">
+        메타모델 입력이 3개(lgb_oof, xgb_oof, cat_oof)에 불과해
+        복잡한 메타모델은 과적합 위험이 있습니다.
+        정규화가 기본 내장된 LogisticRegression을 선택해
+        각 모델의 기여도를 선형으로 학습했습니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 결과 및 인사이트 -->
+  <section>
+    <div class="section-num">06 — Results & Insights</div>
+    <h2>프로젝트 결과 및 인사이트</h2>
+
+    <p>실험 전 과정을 제출 이력으로 추적하며 각 변경의 LB 효과를 검증했습니다.</p>
+
+    <div class="timeline" style="margin-top:1.4rem">
+      <div class="tl-item">
+        <div class="tl-day">Day 1</div>
+        <div class="tl-content">
+          <div class="tl-title">베이스라인 구축</div>
+          <div class="tl-desc">단일 LightGBM · 기본 라벨 인코딩 · 단순 5-Fold CV</div>
+          <span class="tl-score neutral">초기 제출</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 2</div>
+        <div class="tl-content">
+          <div class="tl-title">파이프라인 고도화</div>
+          <div class="tl-desc">Optuna 도입 · OOF 타겟 인코딩 · 3모델 스태킹 · 파생변수 1차 추가 (배아 비율 5종, 이식 여부 플래그)</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 3</div>
+        <div class="tl-content">
+          <div class="tl-title">Donor Egg Feature · 10-Fold × 3-Seed</div>
+          <div class="tl-desc">기증 난자 사용 시 환자 나이 대신 기증자 나이를 반영하는 effective_maternal_age 생성. Fold 수와 Seed 수 확대로 OOF 안정성 향상.</div>
+          <span class="tl-score">LB 0.74168</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 4</div>
+        <div class="tl-content">
+          <div class="tl-title">배아 이식 경과일 피처 추가 — 유일한 추가 개선</div>
+          <div class="tl-desc">
+            데이터 분석에서 이식 경과일 5일 이상 여부에 따라 성공률이 21% → 42%로 두 배 차이남을 발견.
+            이진 피처(이식_5일이상)와 교호작용(이식일 × 배아 수)을 추가해 유의미한 LB 개선 달성.
+          </div>
+          <span class="tl-score">LB 0.74172 ↑</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 5–6</div>
+        <div class="tl-content">
+          <div class="tl-title">다양한 추가 실험 — 모두 효과 없음</div>
+          <div class="tl-desc">Seed 확대(3→5), N_TRIALS 조정, 나이×이식일 교호작용, 피처 제거, 불임원인 복합 점수, 시술 유형 텍스트 파싱. OOF가 오르더라도 LB는 유지되거나 하락.</div>
+          <span class="tl-score down">LB 개선 없음</span>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:2.5rem">핵심 도메인 인사이트</h2>
+    <div class="insight-grid" style="margin-top:1rem">
+      <div class="insight-card">
+        <div class="insight-label">배아 이식 5일차의 의미</div>
+        <div class="insight-text">
+          배반포(Blastocyst) 단계까지 배양된 배아를 이식하는 5일차 이식은
+          3일차 이식 대비 착상률이 높습니다. 데이터에서도 5일 이상 시 성공률이
+          20%p 이상 차이나며 가장 강한 단일 시그널이었습니다.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">기증 난자와 나이 보정</div>
+        <div class="insight-text">
+          Donor Egg IVF에서는 배아 품질이 수혜자 나이가 아닌
+          기증자 나이에 의존합니다. effective_maternal_age 피처가
+          FI 2위를 차지하며 이 도메인 지식이 모델에 실질적으로 기여했습니다.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">클래스 불균형 처리</div>
+        <div class="insight-text">
+          성공(26%) / 실패(74%) 비율에 맞게 scale_pos_weight를 데이터 기반으로
+          자동 계산해 모델에 적용. 임계값 조정보다 AUC 기반 최적화에 집중했습니다.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">OOF ≠ LB의 교훈</div>
+        <div class="insight-text">
+          OOF AUC가 개선되어도 LB가 내려가는 패턴이 반복됐습니다.
+          Train과 Test 분포 차이로 인해 OOF 과신이 실험 방향을 잘못
+          이끌 수 있음을 실제로 경험했습니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 프로젝트 리뷰 -->
+  <section>
+    <div class="section-num">07 — Review</div>
+    <h2>프로젝트 리뷰</h2>
+
+    <div class="timeline">
+      <div class="review-item">
+        <div class="review-tag tag-good">잘한 점</div>
+        <div class="review-text">
+          OOF 타겟 인코딩으로 데이터 누수를 구조적으로 차단했습니다.
+          발표 전까지 다른 팀들이 놓친 leakage 문제를 초기에 인지하고 설계에 반영한 점이
+          안정적인 OOF-LB 상관관계를 만든 기반이었습니다.
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-tag tag-good">잘한 점</div>
+        <div class="review-text">
+          모든 실험을 LB 제출로 검증하고 기록했습니다.
+          OOF 기준으로만 판단하지 않고 실제 LB 효과를 추적해
+          "OOF는 올랐지만 LB는 내렸다"는 패턴을 발견하고 실험 전략을 수정할 수 있었습니다.
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-tag tag-good">잘한 점</div>
+        <div class="review-text">
+          도메인 지식을 피처에 직접 반영했습니다.
+          배아 이식 경과일의 임상적 의미를 데이터로 검증하고
+          이진 피처로 변환해 유일한 LB 개선을 이끌었습니다.
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-tag tag-bad">아쉬운 점</div>
+        <div class="review-text">
+          전처리 순서와 구조적 결측치 처리가 부족했습니다.
+          DI 시술에서 배아 변수가 구조적으로 결측되는 패턴을
+          단순 0 대체가 아닌 Missing Flag로 표현했다면 추가 신호를 얻었을 수 있습니다.
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-tag tag-bad">아쉬운 점</div>
+        <div class="review-text">
+          모델 다양성 확보가 미흡했습니다.
+          LGB · XGB · CatBoost 모두 GBDT 계열이라 상관관계가 높고(~0.999)
+          앙상블 효과가 제한됐습니다. RandomForest나 ExtraTrees 같은
+          다른 계열 모델을 포함했다면 더 높은 다양성을 확보할 수 있었습니다.
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-tag tag-bad">아쉬운 점</div>
+        <div class="review-text">
+          의학 도메인에서 유의미한 변수 조합을 더 찾지 못했습니다.
+          나이 구간별 임계 효과(38~39세 성공률 급락), 시술 유형별 프로토콜 차이 등
+          임상적으로 알려진 패턴을 피처로 구조화하는 시도가 부족했습니다.
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-tag tag-next">다음엔</div>
+        <div class="review-text">
+          OOF와 LB의 상관관계를 초반에 빠르게 파악하는 실험 프레임워크를 먼저 구축하겠습니다.
+          또한 피처 추가보다 데이터 전처리 품질에 더 많은 시간을 투자하고,
+          이기종 모델(트리 + 신경망) 앙상블을 GPU 환경에서 처음부터 설계에 포함시키겠습니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    난임 환자 임신 성공률 예측 프로젝트 · 5조 · 2026
+  </footer>
+
+</div>
+</body>
+</html>

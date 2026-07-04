@@ -1,0 +1,266 @@
+:root{
+  --ink:#1B2130;
+  --paper:#F6F4EF;
+  --paper-dim:#EDEAE2;
+  --line:#D8D3C6;
+  --teal:#0F8B8D;
+  --amber:#E2A33D;
+  --muted:#6B6B63;
+  --mono:'IBM Plex Mono', monospace;
+  --sans:'IBM Plex Sans KR', sans-serif;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;}
+.contact-row a{
+  color:var(--teal);
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:border-color .2s;
+}
+.contact-row a:hover{border-bottom-color:var(--teal);}
+
+.wrap{max-width:880px; margin:0 auto; padding:0 28px;}
+
+/* ---------- HEADER : MODEL CARD ---------- */
+header.card{
+  border:1px solid var(--ink);
+  margin:40px auto 32px;
+  max-width:880px;
+  background:var(--paper);
+  position:relative;
+}
+.card-tag{
+  display:flex; justify-content:space-between; align-items:center;
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.04em;
+  padding:10px 20px;
+  border-bottom:1px solid var(--ink);
+  color:var(--muted);
+}
+.card-tag .status{color:var(--teal); font-weight:600;}
+.card-body{
+  padding:36px 32px 30px;
+  display:flex;
+  align-items:flex-start;
+  gap:32px;
+}
+.card-body-text{flex:1;}
+.profile{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--line);
+  flex-shrink:0;
+}
+.role-eyebrow{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--teal);
+  letter-spacing:.06em;
+  margin-bottom:10px;
+}
+h1.name{
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:clamp(34px, 6vw, 52px);
+  letter-spacing:-0.01em;
+  line-height:1.05;
+}
+.name .dim{color:var(--muted); font-weight:400;}
+.tagline{
+  margin-top:14px;
+  font-size:16px;
+  max-width:58ch;
+  color:#3A3F4C;
+}
+.contact-row{
+  margin-top:22px;
+  display:flex; flex-wrap:wrap; gap:16px;
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--muted);
+}
+.contact-row span::before{content:"› "; color:var(--amber);}
+
+.stat-strip{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  border-top:1px solid var(--ink);
+}
+.stat{
+  padding:16px 18px;
+  border-right:1px solid var(--line);
+}
+.stat:last-child{border-right:none;}
+.stat .num{
+  font-family:var(--mono);
+  font-size:24px;
+  font-weight:700;
+  color:var(--ink);
+}
+.stat .label{
+  margin-top:2px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* ---------- SECTIONS ---------- */
+section{padding:34px 0;}
+section + section{border-top:1px solid var(--line);}
+
+.sec-head{
+  display:flex; align-items:baseline; gap:10px;
+  margin-bottom:20px;
+}
+.sec-head .idx{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--amber);
+}
+.sec-head h2{
+  font-family:var(--mono);
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:var(--ink);
+}
+.sec-head::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:var(--line);
+}
+
+.summary p{max-width:66ch; font-size:15px; color:#333;}
+
+/* Skills as schema fields */
+.skill-group{margin-bottom:16px;}
+.skill-group:last-child{margin-bottom:0;}
+.skill-key{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:8px;
+  display:block;
+}
+.tags{display:flex; flex-wrap:wrap; gap:8px;}
+.tag{
+  font-family:var(--mono);
+  font-size:12.5px;
+  padding:5px 10px;
+  border:1px solid var(--ink);
+  background:var(--paper-dim);
+  white-space:nowrap;
+}
+
+/* Projects */
+.project{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:18px;
+  padding:18px 0;
+}
+.project + .project{border-top:1px dashed var(--line);}
+.proj-date{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--muted);
+  padding-top:3px;
+}
+.proj-title{
+  font-weight:600;
+  font-size:16px;
+  margin-bottom:6px;
+}
+.proj-desc{font-size:14px; color:#3A3F4C; max-width:60ch;}
+.proj-tags{margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;}
+.proj-tags .tag{font-size:11px; padding:3px 8px; background:transparent;}
+
+/* Education / Activities as timeline */
+.tl-item{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:18px;
+  padding:14px 0;
+}
+.tl-item + .tl-item{border-top:1px dashed var(--line);}
+.tl-date{font-family:var(--mono); font-size:12px; color:var(--muted); padding-top:2px;}
+.tl-title{font-weight:600; font-size:15px;}
+.tl-sub{font-size:13.5px; color:var(--muted); margin-top:2px;}
+
+footer{
+  padding:30px 0 50px;
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--muted);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+}
+
+@media (max-width:640px){
+  .stat-strip{grid-template-columns:repeat(2,1fr);}
+  .stat:nth-child(2){border-right:none;}
+  .project, .tl-item{grid-template-columns:1fr;}
+  .proj-date, .tl-date{padding-top:0;}
+  .card-body{flex-direction:column; align-items:center; text-align:center; gap:20px;}
+  .card-body-text{width:100%;}
+  .contact-row{justify-content:center;}
+  .profile{width:90px; height:90px;}
+}
+
+/* ---------- VISITOR FORM ---------- */
+.visitor-inputs{
+  display:flex; flex-wrap:wrap; gap:10px;
+  margin-bottom:20px;
+}
+.visitor-inputs input{
+  font-family:var(--mono);
+  font-size:13px;
+  padding:8px 12px;
+  border:1px solid var(--ink);
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  flex:1;
+  min-width:160px;
+}
+.visitor-inputs input:focus{border-color:var(--teal);}
+.visitor-inputs input::placeholder{color:var(--muted);}
+.visitor-inputs button{
+  font-family:var(--mono);
+  font-size:13px;
+  padding:8px 18px;
+  background:var(--ink);
+  color:var(--paper);
+  border:none;
+  cursor:pointer;
+  transition:background .2s;
+}
+.visitor-inputs button:hover{background:var(--teal);}
+.visitor-log{
+  list-style:none;
+  display:flex; flex-direction:column; gap:8px;
+}
+.visitor-log li{
+  font-family:var(--mono);
+  font-size:13px;
+  padding:10px 14px;
+  border:1px dashed var(--line);
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+}
+.visitor-log .v-name{color:var(--teal); font-weight:600; white-space:nowrap;}
+.visitor-log .v-msg{color:var(--ink); flex:1;}
+.visitor-log .v-time{color:var(--muted); font-size:11px; white-space:nowrap;}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+}
