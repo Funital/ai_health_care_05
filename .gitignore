@@ -41,3 +41,6 @@ ENV/
 dist/
 build/
 *.egg-info/
+
+# Resume assets
+resume/assets/real_image.png
