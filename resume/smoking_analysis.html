@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>흡연 여부 데이터 분석 포트폴리오</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0D1B2A;
+    --navy2:   #132233;
+    --slate:   #4A5568;
+    --silver:  #8A99AA;
+    --rule:    #1E2F42;
+    --bg:      #F5F4F0;
+    --white:   #FFFFFF;
+    --teal:    #2EC4B6;
+    --amber:   #F4A261;
+    --red:     #E05C5C;
+    --green:   #3DBE7A;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'Noto Sans KR', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--navy);
+    color: var(--bg);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--navy2);
+    border-right: 1px solid var(--rule);
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 0 24px;
+    z-index: 100;
+  }
+
+  .sidebar-brand {
+    padding: 0 28px 32px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .sidebar-brand .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .sidebar-brand h2 {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--bg);
+  }
+
+  nav { padding: 24px 0; flex: 1; }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--silver);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s, background 0.2s;
+    border-left: 2px solid transparent;
+  }
+
+  nav a:hover, nav a.active {
+    color: var(--teal);
+    background: rgba(46,196,182,0.06);
+    border-left-color: var(--teal);
+  }
+
+  nav a .num {
+    font-size: 9px;
+    color: var(--slate);
+    min-width: 18px;
+  }
+
+  .sidebar-footer {
+    padding: 20px 28px 0;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--slate);
+    line-height: 1.7;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 0 64px 80px;
+    max-width: 960px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 64px;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--white);
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--teal);
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--silver);
+    line-height: 1.7;
+    max-width: 560px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 36px;
+  }
+
+  .meta-item .meta-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--slate);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .meta-item .meta-val {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--bg);
+  }
+
+  /* ── SECTION ── */
+  section {
+    margin-bottom: 72px;
+    scroll-margin-top: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .section-rule {
+    height: 1px;
+    background: var(--rule);
+    margin-bottom: 28px;
+  }
+
+  /* ── OVERVIEW TABLE ── */
+  .ov-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .ov-table tr { border-bottom: 1px solid var(--rule); }
+  .ov-table tr:last-child { border-bottom: none; }
+
+  .ov-table td {
+    padding: 14px 16px;
+    vertical-align: top;
+    line-height: 1.6;
+    color: var(--bg);
+  }
+
+  .ov-table td:first-child {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--silver);
+    letter-spacing: 0.05em;
+    width: 160px;
+    padding-right: 24px;
+    white-space: nowrap;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: rgba(46,196,182,0.07);
+    border-left: 3px solid var(--teal);
+    padding: 18px 22px;
+    border-radius: 0 6px 6px 0;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--bg);
+    line-height: 1.75;
+    font-style: italic;
+  }
+
+  /* ── QUESTION PILLS ── */
+  .q-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .q-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--bg);
+  }
+
+  .q-item::before {
+    content: "Q.";
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+
+  .stat-card .stat-val {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--teal);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 11px;
+    color: var(--silver);
+    line-height: 1.4;
+  }
+
+  /* ── DATA GRID TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .data-table thead tr {
+    border-bottom: 1px solid var(--teal);
+  }
+
+  .data-table thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.15s;
+  }
+
+  .data-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+  .data-table tbody tr:last-child { border-bottom: none; }
+
+  .data-table tbody td {
+    padding: 12px 14px;
+    color: var(--bg);
+    line-height: 1.55;
+    vertical-align: top;
+  }
+
+  .data-table tbody td code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(46,196,182,0.1);
+    color: var(--teal);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── HYPOTHESIS CARDS ── */
+  .hyp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .hyp-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hyp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--green);
+  }
+
+  .hyp-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--silver);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .hyp-var {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .hyp-meta {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hyp-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: rgba(255,255,255,0.07);
+    color: var(--silver);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  .hyp-pval {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+  }
+
+  .hyp-verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+    background: rgba(61,190,122,0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  /* ── CORRELATION BARS ── */
+  .corr-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .corr-item {
+    display: grid;
+    grid-template-columns: 140px 1fr 60px;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .corr-name {
+    font-size: 13px;
+    color: var(--bg);
+    text-align: right;
+  }
+
+  .corr-track {
+    height: 8px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .corr-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  .corr-fill.pos { background: var(--teal); }
+  .corr-fill.neg { background: var(--amber); float: right; }
+
+  .corr-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-align: right;
+  }
+
+  .corr-val.pos { color: var(--teal); }
+  .corr-val.neg { color: var(--amber); }
+
+  /* ── INSIGHT CARDS ── */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+  }
+
+  .insight-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .insight-icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .insight-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .insight-card p {
+    font-size: 13px;
+    color: var(--silver);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── TECH STACK ── */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .stack-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .stack-card .stack-cat {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stack-card .stack-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .stack-card .stack-desc {
+    font-size: 12px;
+    color: var(--silver);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* ── REASON BLOCKS ── */
+  .reason-block {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .reason-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .reason-block h3 {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--teal);
+    margin-bottom: 10px;
+  }
+
+  .reason-block p {
+    font-size: 14px;
+    color: var(--silver);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  .reason-block ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .reason-block ul li {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--bg);
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .reason-block ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--teal);
+  }
+
+  /* ── REVIEW ── */
+  .review-section {
+    margin-bottom: 28px;
+  }
+
+  .review-section h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .review-section h3 .badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 3px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .badge.good { background: rgba(61,190,122,0.15); color: var(--green); }
+  .badge.bad  { background: rgba(244,162,97,0.15);  color: var(--amber); }
+  .badge.next { background: rgba(46,196,182,0.15);  color: var(--teal); }
+
+  .review-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .review-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--silver);
+    font-weight: 300;
+  }
+
+  .review-item strong {
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .review-item .ri-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .ri-dot.green { background: var(--green); }
+  .ri-dot.amber { background: var(--amber); }
+  .ri-dot.teal  { background: var(--teal); }
+
+  /* ── BLOOD PRESSURE BOX ── */
+  .bp-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .bp-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+
+  .bp-card .bp-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+
+  .bp-card .bp-text {
+    font-size: 11px;
+    color: var(--silver);
+    line-height: 1.5;
+  }
+
+  /* misc */
+  p { font-size: 14px; color: var(--silver); line-height: 1.75; font-weight: 300; }
+  strong { color: var(--bg); font-weight: 700; }
+  h3 { font-size: 15px; font-weight: 700; color: var(--white); margin: 24px 0 12px; }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px; }
+    .stat-cards { grid-template-columns: repeat(2, 1fr); }
+    .hyp-grid, .insight-grid, .stack-grid { grid-template-columns: 1fr; }
+    .bp-grid { grid-template-columns: repeat(3, 1fr); }
+    .corr-item { grid-template-columns: 110px 1fr 50px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="label">Portfolio / EDA</div>
+    <h2>흡연 여부<br>데이터 분석</h2>
+  </div>
+  <nav>
+    <a href="#overview"><span class="num">01</span>개요</a>
+    <a href="#background"><span class="num">02</span>배경 & 문제 정의</a>
+    <a href="#data"><span class="num">03</span>사용 데이터</a>
+    <a href="#stack"><span class="num">04</span>기술 스택</a>
+    <a href="#reason"><span class="num">05</span>기술 선정 이유</a>
+    <a href="#results"><span class="num">06</span>결과 & 인사이트</a>
+    <a href="#review"><span class="num">07</span>프로젝트 리뷰</a>
+  </nav>
+  <div class="sidebar-footer">
+    Python · Pandas · SciPy<br>
+    Seaborn · Statsmodels<br>
+    Team Project · EDA
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Data Analysis Portfolio</div>
+    <h1>흡연 여부 데이터 분석을 통한<br><em>건강 인사이트</em> 도출</h1>
+    <p class="hero-sub">7,000명의 건강검진 데이터를 기반으로 흡연자와 비흡연자 간 혈액·신체 지표 차이를 통계적으로 검증하고, 예측 모델 개발을 위한 Feature 후보를 선별합니다.</p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Type</div>
+        <div class="meta-val">Team EDA</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Period</div>
+        <div class="meta-val">2025</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Samples</div>
+        <div class="meta-val">7,000</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Variables</div>
+        <div class="meta-val">18 cols</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 개요 -->
+  <section id="overview">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>개요</h2>
+    </div>
+    <div class="section-rule"></div>
+    <table class="ov-table">
+      <tr><td>프로젝트명</td><td>흡연 여부 데이터 분석을 통한 건강 인사이트 도출</td></tr>
+      <tr><td>유형</td><td>팀 프로젝트 (EDA 중심 데이터 분석)</td></tr>
+      <tr><td>기간</td><td>2025년</td></tr>
+      <tr><td>역할</td><td>데이터 분석 전반 — 단변량·이변량·상관관계 분석, 가설 수립 및 검정</td></tr>
+      <tr><td>목적</td><td>흡연자와 비흡연자 간 건강 지표 차이를 통계적으로 분석하고, 향후 예측 모델 개발을 위한 기초 분석 기반 마련</td></tr>
+    </table>
+  </section>
+
+  <!-- 02 배경 -->
+  <section id="background">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>프로젝트 배경 & 문제 정의</h2>
+    </div>
+    <div class="section-rule"></div>
+
+    <h3>배경</h3>
+    <p>흡연은 심혈관 질환, 폐 질환, 대사 이상 등 다양한 건강 문제와 연관된 것으로 알려져 있다. 그러나 단순한 의학적 상식이 아닌, <strong>실제 데이터를 통해 흡연이 각 건강 지표에 얼마나 유의미한 영향을 미치는지</strong> 수치로 검증하고자 했다.</p>
+
+    <h3>문제 정의</h3>
+    <div class="callout">
+      "흡연 여부(label)에 따라 주요 혈액·신체 지표에 통계적으로 유의미한 차이가 존재하는가?"
+    </div>
+    <p>단순 시각적 비교를 넘어, <strong>가설 수립 → 통계 검정 → 인사이트 도출</strong>의 분석 흐름을 직접 설계하고 수행했다. 분석 과정에서 <strong>'혈압' 컬럼이 실제로는 맥압(Pulse Pressure)일 가능성</strong>을 발견하고, 데이터 무결성 검증까지 수행했다.</p>
+
+    <h3>핵심 질문</h3>
+    <div class="q-list">
+      <div class="q-item">흡연자와 비흡연자 간 헤모글로빈, 중성 지방, HDL 콜레스테롤 수치는 유의미하게 다른가?</div>
+      <div class="q-item">각 건강 지표는 흡연 예측에 얼마나 유용한 Feature가 될 수 있는가?</div>
+      <div class="q-item">'혈압' 컬럼은 이완기 혈압인가, 맥압(Pulse Pressure)인가?</div>
+    </div>
+  </section>
+
+  <!-- 03 데이터 -->
+  <section id="data">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>사용 데이터 설명</h2>
+    </div>
+    <div class="section-rule"></div>
+
+    <div class="stat-cards">
+      <div class="stat-card"><span class="stat-val">7,000</span><div class="stat-label">샘플 수</div></div>
+      <div class="stat-card"><span class="stat-val">18</span><div class="stat-label">변수 수</div></div>
+      <div class="stat-card"><span class="stat-val">63%</span><div class="stat-label">비흡연 비율</div></div>
+      <div class="stat-card"><span class="stat-val">37%</span><div class="stat-label">흡연 비율</div></div>
+    </div>
+
+    <h3>주요 변수</h3>
+    <table class="data-table">
+      <thead><tr><th>유형</th><th>변수</th></tr></thead>
+      <tbody>
+        <tr><td>신체 계측</td><td>나이, 키, 몸무게, BMI</td></tr>
+        <tr><td>혈액 지표</td><td>헤모글로빈, 중성 지방, 콜레스테롤, HDL, LDL, 혈청 크레아티닌</td></tr>
+        <tr><td>대사 지표</td><td>공복 혈당, 간 효소율</td></tr>
+        <tr><td>기타</td><td>시력, 충치, 요 단백, 혈압(맥압으로 추정)</td></tr>
+        <tr><td>파생 변수</td><td>체중 상태(BMI 구간), 연령대, 흡연_유무, 충치_유무, 단백뇨_유무</td></tr>
+      </tbody>
+    </table>
+
+    <h3>결측치 처리</h3>
+    <table class="data-table">
+      <thead><tr><th>변수</th><th>처리 방법</th><th>이유</th></tr></thead>
+      <tbody>
+        <tr><td>시력</td><td>최빈값 대체</td><td>0.1 단위 이산값이라 평균이 실제 측정값이 아님</td></tr>
+        <tr><td>공복 혈당</td><td>나이대별 중앙값 대체</td><td>나이 영향 강하고 우편향 분포</td></tr>
+        <tr><td>중성 지방</td><td>나이대별 중앙값 대체</td><td>극단값으로 인한 강한 우편향</td></tr>
+        <tr><td>혈압(맥압)</td><td>나이대별 중앙값 대체</td><td>나이에 따른 우상향 패턴 뚜렷</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 04 기술 스택 -->
+  <section id="stack">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>기술 스택</h2>
+    </div>
+    <div class="section-rule"></div>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-cat">Language</div>
+        <div class="stack-name">Python 3</div>
+        <div class="stack-desc">분석 전반의 기반 언어</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-cat">Data</div>
+        <div class="stack-name">Pandas · NumPy</div>
+        <div class="stack-desc">탐색, 파생 변수 생성, 그룹 집계</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-cat">Visualization</div>
+        <div class="stack-name">Seaborn · Matplotlib</div>
+        <div class="stack-desc">히스토그램, 박스플롯, KDE, 바이올린</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-cat">Statistics</div>
+        <div class="stack-name">SciPy (stats)</div>
+        <div class="stack-desc">정규성 검정, t-검정, 카이제곱, Mann-Whitney</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-cat">Regression</div>
+        <div class="stack-name">Statsmodels</div>
+        <div class="stack-desc">로지스틱 회귀 p-value 확인</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-cat">Environment</div>
+        <div class="stack-name">Jupyter · Kaggle</div>
+        <div class="stack-desc">노트북 기반 인터랙티브 분석</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 기술 선정 이유 -->
+  <section id="reason">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>기술 선정 이유</h2>
+    </div>
+    <div class="section-rule"></div>
+    <div class="reason-block">
+      <h3>Pandas / NumPy</h3>
+      <p>데이터 탐색, 파생 변수 생성, 그룹별 집계 등 분석의 기반이 되는 라이브러리로, 범용성과 직관성 모두 높아 EDA 전반에 활용했다.</p>
+    </div>
+    <div class="reason-block">
+      <h3>Seaborn + Matplotlib</h3>
+      <p>흡연/비흡연 그룹 간 분포 차이를 직관적으로 보여주기 위해 다양한 시각화를 조합했다. Seaborn은 그룹별 색상 분리가 간결해 이변량 비교에 적합했다.</p>
+    </div>
+    <div class="reason-block">
+      <h3>SciPy (stats)</h3>
+      <ul>
+        <li><code>shapiro</code> — 정규성 검정으로 t-검정 vs 비모수 검정 방법 결정</li>
+        <li><code>ttest_ind</code> — 수치형 변수와 흡연 여부 간 평균 차이 검정</li>
+        <li><code>mannwhitneyu</code> — 비정규 분포 변수에 대한 비모수 검정</li>
+        <li><code>chi2_contingency</code> — 범주형 변수와 흡연 여부 간 독립성 검정</li>
+      </ul>
+    </div>
+    <div class="reason-block">
+      <h3>Statsmodels</h3>
+      <p>로지스틱 회귀 모형의 회귀계수 p-value를 통해 각 변수의 흡연 예측력을 정량적으로 확인하는 데 활용했다.</p>
+    </div>
+  </section>
+
+  <!-- 06 결과 -->
+  <section id="results">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>프로젝트 결과 & 인사이트</h2>
+    </div>
+    <div class="section-rule"></div>
+
+    <h3>🔍 데이터 무결성 검증 — 혈압 컬럼의 정체</h3>
+    <p>분석 초기, '혈압' 컬럼의 평균이 약 <strong>45.6 mmHg</strong>로 일반적인 혈압 정상값(110~130 mmHg)과 전혀 다름을 발견했다. 5가지 의학적 증거를 통해 이 컬럼이 <strong>맥압(Pulse Pressure)</strong>일 가능성이 높다고 결론 내렸다.</p>
+    <div class="bp-grid">
+      <div class="bp-card"><div class="bp-num">증거 1</div><div class="bp-text">평균 45.56 → 맥압 정상 범위(30~60) 부합</div></div>
+      <div class="bp-card"><div class="bp-num">증거 2</div><div class="bp-text">60세 이후 급격 상승 → 혈관 경직 반영</div></div>
+      <div class="bp-card"><div class="bp-num">증거 3</div><div class="bp-text">변동계수 0.194 ≈ 맥압 문산도(0.20)</div></div>
+      <div class="bp-card"><div class="bp-num">증거 4</div><div class="bp-text">나이 상관계수 +0.167 → 대동맥 탄성 감소</div></div>
+      <div class="bp-card"><div class="bp-num">증거 5</div><div class="bp-text">BMI 상관계수 +0.165 → 비만도 영향(맥압 특성)</div></div>
+    </div>
+
+    <h3>📊 가설 검정 결과</h3>
+    <div class="hyp-grid">
+      <div class="hyp-card">
+        <div class="hyp-num">가설 01 · 혈관 및 지질 대사</div>
+        <div class="hyp-var">중성 지방 · LDL · HDL</div>
+        <div class="hyp-meta">
+          <span class="hyp-tag">t-검정</span>
+          <span class="hyp-pval">p &lt; 0.05</span>
+        </div>
+        <div class="hyp-verdict">✓ 귀무가설 기각</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-num">가설 02 · 신장 및 노폐물 필터링</div>
+        <div class="hyp-var">혈청 크레아티닌</div>
+        <div class="hyp-meta">
+          <span class="hyp-tag">t-검정</span>
+          <span class="hyp-pval">p = 1.47e-62</span>
+        </div>
+        <div class="hyp-verdict">✓ 귀무가설 기각</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-num">가설 03 · 간 기능 및 대사 효소</div>
+        <div class="hyp-var">간 효소율</div>
+        <div class="hyp-meta">
+          <span class="hyp-tag">t-검정</span>
+          <span class="hyp-pval">p = 2.18e-55</span>
+        </div>
+        <div class="hyp-verdict">✓ 귀무가설 기각</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-num">가설 04 · 혈당 조절</div>
+        <div class="hyp-var">공복 혈당</div>
+        <div class="hyp-meta">
+          <span class="hyp-tag">t-검정</span>
+          <span class="hyp-pval">p = 4.43e-17</span>
+        </div>
+        <div class="hyp-verdict">✓ 귀무가설 기각</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-num">가설 05 · 산소 운반 및 혈액 농도</div>
+        <div class="hyp-var">헤모글로빈</div>
+        <div class="hyp-meta">
+          <span class="hyp-tag">t-검정</span>
+          <span class="hyp-pval">p = 3.32e-270</span>
+        </div>
+        <div class="hyp-verdict">✓ 귀무가설 기각</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-num">가설 06 · 구강 건강</div>
+        <div class="hyp-var">충치</div>
+        <div class="hyp-meta">
+          <span class="hyp-tag">카이제곱</span>
+          <span class="hyp-pval">p = 2.23e-16</span>
+        </div>
+        <div class="hyp-verdict">✓ 귀무가설 기각</div>
+      </div>
+    </div>
+
+    <h3>📈 흡연과 건강 지표의 상관관계 순위 (Pearson)</h3>
+    <div class="corr-list">
+      <div class="corr-item">
+        <div class="corr-name">헤모글로빈</div>
+        <div class="corr-track"><div class="corr-fill pos" style="width:80%"></div></div>
+        <div class="corr-val pos">+0.402</div>
+      </div>
+      <div class="corr-item">
+        <div class="corr-name">키(cm)</div>
+        <div class="corr-track"><div class="corr-fill pos" style="width:79%"></div></div>
+        <div class="corr-val pos">+0.395</div>
+      </div>
+      <div class="corr-item">
+        <div class="corr-name">몸무게(kg)</div>
+        <div class="corr-track"><div class="corr-fill pos" style="width:62%"></div></div>
+        <div class="corr-val pos">+0.312</div>
+      </div>
+      <div class="corr-item">
+        <div class="corr-name">중성 지방</div>
+        <div class="corr-track"><div class="corr-fill pos" style="width:50%"></div></div>
+        <div class="corr-val pos">+0.248</div>
+      </div>
+      <div class="corr-item">
+        <div class="corr-name">간 효소율</div>
+        <div class="corr-track"><div class="corr-fill neg" style="width:37%"></div></div>
+        <div class="corr-val neg">−0.184</div>
+      </div>
+      <div class="corr-item">
+        <div class="corr-name">HDL</div>
+        <div class="corr-track"><div class="corr-fill neg" style="width:36%"></div></div>
+        <div class="corr-val neg">−0.181</div>
+      </div>
+    </div>
+
+    <h3>💡 핵심 인사이트</h3>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-icon">🩸</div>
+        <h4>헤모글로빈 — 가장 강력한 바이오마커</h4>
+        <p>r = +0.402로 1위. CO 노출로 인한 보상성 적혈구 증가 메커니즘으로 설명 가능하다.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🫀</div>
+        <h4>중성 지방 ↑, HDL ↓</h4>
+        <p>흡연이 지질 대사를 교란함을 데이터로 확인. LCAT 효소 억제로 HDL 합성 감소.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">⚠️</div>
+        <h4>간 효소율 역설</h4>
+        <p>흡연자에서 오히려 낮게 나타나 추가 해석 필요. AST/ALT 정의 불명확이 원인일 수 있다.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📐</div>
+        <h4>클래스 불균형 주의</h4>
+        <p>비흡연자(63%) &gt; 흡연자(37%)의 비율 차이로 상관관계 분석 시 비대칭 해석 가능성 존재.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 리뷰 -->
+  <section id="review">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>프로젝트 리뷰</h2>
+    </div>
+    <div class="section-rule"></div>
+
+    <div class="review-section">
+      <h3><span class="badge good">Good</span> 잘한 점</h3>
+      <div class="review-items">
+        <div class="review-item"><div class="ri-dot green"></div><div><strong>분석 흐름을 스스로 설계:</strong> 단변량 → 이변량 → 상관관계의 단계적 흐름을 이해하고, 각 단계의 목적과 연결 고리를 명확히 인식하며 진행했다.</div></div>
+        <div class="review-item"><div class="ri-dot green"></div><div><strong>데이터 무결성 의심:</strong> '혈압' 컬럼의 수치가 의학적으로 이상함을 발견하고, 5가지 증거를 기반으로 맥압 가설을 수립·검증했다.</div></div>
+        <div class="review-item"><div class="ri-dot green"></div><div><strong>검정 방법 선택 근거 명확화:</strong> 정규성 검정을 선행해 t-검정 vs Mann-Whitney U 중 적합한 방법을 선택했다.</div></div>
+        <div class="review-item"><div class="ri-dot green"></div><div><strong>범주형 vs 수치형 혼합 분석:</strong> 변수 유형에 따라 카이제곱 검정, t-검정, 로지스틱 회귀를 구분해 적용했다.</div></div>
+      </div>
+    </div>
+
+    <div class="review-section">
+      <h3><span class="badge bad">Learned</span> 아쉬운 점 & 배운 점</h3>
+      <div class="review-items">
+        <div class="review-item"><div class="ri-dot amber"></div><div><strong>성별 정보 부재:</strong> 헤모글로빈은 성별에 따라 정상 범위가 다른데, 성별 컬럼 부재로 흡연 효과와 성별 효과를 분리할 수 없었다. 교란 변수의 중요성을 실감했다.</div></div>
+        <div class="review-item"><div class="ri-dot amber"></div><div><strong>'간 효소율' 정의 불명확:</strong> AST인지 ALT인지 알 수 없어 해석에 한계가 있었다. 데이터 명세서(Data Dictionary)의 중요성을 배웠다.</div></div>
+        <div class="review-item"><div class="ri-dot amber"></div><div><strong>Chi2 vs Cramér's V:</strong> 표본 7,000개로 Chi2가 과도하게 커져 p-value만으로는 실질적 효과 크기를 판단하기 어려웠다. 이후엔 Cramér's V를 함께 보는 습관이 필요하다.</div></div>
+        <div class="review-item"><div class="ri-dot amber"></div><div><strong>클래스 불균형:</strong> 비흡연 63% / 흡연 37%의 불균형이 예측 모델 개발 시 성능 저하 요인이 될 수 있다. 향후 SMOTE 등을 고려해야 할 것이다.</div></div>
+      </div>
+    </div>
+
+    <div class="review-section">
+      <h3><span class="badge next">Next</span> 향후 발전 방향</h3>
+      <div class="review-items">
+        <div class="review-item"><div class="ri-dot teal"></div><div>흡연 예측 분류 모델 개발 — Logistic Regression, Random Forest, XGBoost</div></div>
+        <div class="review-item"><div class="ri-dot teal"></div><div>성별·음주·운동 등 교란 변수 추가 확보 후 재분석</div></div>
+        <div class="review-item"><div class="ri-dot teal"></div><div>맥압 컬럼 재정의 후 심혈관 위험도 예측 모델 연계</div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // 스크롤 시 사이드바 active 업데이트
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
