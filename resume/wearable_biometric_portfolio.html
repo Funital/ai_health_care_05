@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>웨어러블 생체 데이터 저장 및 건강 이상 탐지 분석</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#eef2f4;
+    --panel:#ffffff;
+    --ink:#12161c;
+    --muted:#626d78;
+    --faint:#98a2ac;
+    --line:#dde3e8;
+    --line-soft:#e8edf0;
+    --hr:#dc3d43;        /* 심박 */
+    --spo2:#2e6ff2;      /* 산소 */
+    --temp:#e0891f;      /* 체온 */
+    --teal:#0b6e6b;      /* 구조 강조 */
+    --ok:#3f9d6d;
+    --mono:'IBM Plex Mono',monospace;
+    --disp:'Space Grotesk','Pretendard',sans-serif;
+    --body:'Pretendard',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:var(--body);line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:"tnum";
+  }
+  a{color:inherit}
+  ::selection{background:var(--teal);color:#fff}
+
+  /* ---------- layout ---------- */
+  .wrap{display:grid;grid-template-columns:280px 1fr;max-width:1240px;margin:0 auto;gap:0}
+  .sidebar{
+    position:sticky;top:0;align-self:start;height:100vh;
+    padding:44px 30px;border-right:1px solid var(--line);
+    background:var(--bg);display:flex;flex-direction:column;
+  }
+  .main{padding:0 clamp(24px,5vw,72px) 100px;min-width:0}
+
+  /* ---------- sidebar ---------- */
+  .sb-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+  .sb-name{font-family:var(--disp);font-weight:700;font-size:20px;line-height:1.35;letter-spacing:-.01em}
+  .sb-meta{margin-top:26px;display:flex;flex-direction:column;gap:13px}
+  .sb-meta div{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+  .sb-meta div b{display:block;color:var(--ink);font-weight:600;font-size:12.5px;margin-top:2px;letter-spacing:0}
+  .sb-nav{margin-top:auto;display:flex;flex-direction:column;gap:3px;padding-top:30px}
+  .sb-nav a{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;
+    padding:6px 0;display:flex;gap:11px;align-items:baseline;transition:color .15s}
+  .sb-nav a span{color:var(--faint);font-size:10.5px}
+  .sb-nav a:hover,.sb-nav a:focus-visible{color:var(--teal)}
+
+  /* ---------- hero / monitor ---------- */
+  .hero{padding:56px 0 44px;border-bottom:1px solid var(--line)}
+  .kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--teal);margin-bottom:18px}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(28px,4.4vw,44px);
+    line-height:1.14;letter-spacing:-.025em;max-width:16ch}
+  .lede{margin-top:20px;font-size:16.5px;color:var(--muted);max-width:52ch}
+
+  .monitor{margin-top:34px;background:#0d1319;border-radius:14px;overflow:hidden;
+    box-shadow:0 20px 50px -28px rgba(13,19,25,.6)}
+  .mon-bar{display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid #1c2831}
+  .mon-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .mon-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#6d7f8c;text-transform:uppercase}
+  .mon-label b{color:#c6d2da;font-weight:500}
+  .ecg{height:96px;width:100%;display:block;background:
+    linear-gradient(90deg,#0d1319 0%,transparent 12%,transparent 88%,#0d1319 100%),
+    repeating-linear-gradient(90deg,#141d24 0 1px,transparent 1px 34px),
+    repeating-linear-gradient(0deg,#141d24 0 1px,transparent 1px 34px)}
+  .ecg svg{width:200%;height:100%}
+  .ecg-line{animation:scroll 7s linear infinite}
+  @keyframes scroll{to{transform:translateX(-1200px)}}
+
+  .vitals{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #1c2831}
+  .vital{padding:16px 18px 18px;border-right:1px solid #1c2831}
+  .vital:last-child{border-right:0}
+  .vital .vt{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#6d7f8c}
+  .vital .vv{font-family:var(--disp);font-weight:700;font-size:26px;color:#e9eff3;margin-top:6px;line-height:1}
+  .vital .vv small{font-size:12px;font-weight:500;color:#8798a4;margin-left:3px}
+  .vital .vu{font-family:var(--mono);font-size:10.5px;color:#5f7280;margin-top:5px}
+
+  /* ---------- sections ---------- */
+  section{padding:54px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:26px}
+  .sec-num{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.1em}
+  h2{font-family:var(--disp);font-weight:600;font-size:22px;letter-spacing:-.015em}
+  .sec-sub{color:var(--muted);font-size:15px;max-width:60ch;margin-bottom:22px;margin-top:-8px}
+  p{font-size:15.5px;color:#33404b}
+  p+p{margin-top:14px}
+  strong{color:var(--ink);font-weight:600}
+
+  /* ---------- architecture ---------- */
+  .arch{display:flex;align-items:stretch;gap:14px;flex-wrap:wrap;margin-top:6px}
+  .node{flex:1;min-width:150px;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:16px 18px}
+  .node .nlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .node .nval{font-family:var(--disp);font-weight:600;font-size:15px;margin-top:5px}
+  .node .nsub{font-size:12.5px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+  .arch .grp{flex:2;min-width:280px;display:flex;gap:14px}
+  .arch .grp .node{border-top:3px solid var(--teal)}
+  .arch-arrow{align-self:center;font-family:var(--mono);color:var(--faint);font-size:18px}
+
+  /* ---------- code compare ---------- */
+  .code2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  .code{background:#0d1319;border-radius:11px;overflow:hidden;border:1px solid #1c2831}
+  .code-h{display:flex;align-items:center;justify-content:space-between;
+    padding:11px 16px;border-bottom:1px solid #1c2831}
+  .code-h .cn{font-family:var(--mono);font-size:12px;color:#c6d2da;font-weight:500}
+  .code-h .cb{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    padding:3px 8px;border-radius:20px}
+  .cb.rel{background:rgba(11,110,107,.18);color:#4fd1cc}
+  .cb.doc{background:rgba(46,111,242,.18);color:#89b0ff}
+  pre{margin:0;padding:16px;overflow-x:auto}
+  code{font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#c9d4dc}
+  .k{color:#7aa7ff}.f{color:#5ecfc9}.s{color:#d6a15e}.c{color:#5b6b76}
+
+  /* ---------- vitals result panel ---------- */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:6px}
+  .prow{display:grid;grid-template-columns:150px 116px 1fr 88px;align-items:center;
+    gap:16px;padding:15px 20px;border-top:1px solid var(--line-soft)}
+  .prow:first-child{border-top:0}
+  .prow .plab{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:9px}
+  .swatch{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+  .prow .pthr{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .bar{height:9px;border-radius:5px;background:var(--line-soft);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:5px}
+  .prow .pcnt{text-align:right;font-family:var(--disp);font-weight:700;font-size:16px}
+  .prow .pcnt small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--faint);font-weight:400}
+  .panel-foot{padding:13px 20px;background:#f7f9fa;border-top:1px solid var(--line);
+    font-size:13px;color:var(--muted)}
+  .panel-foot b{color:var(--hr)}
+
+  /* ---------- data table ---------- */
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
+  th,td{text-align:right;padding:11px 14px;border-bottom:1px solid var(--line-soft)}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);font-weight:500;border-bottom:1px solid var(--line)}
+  tbody td{font-variant-numeric:tabular-nums}
+  tbody tr td:first-child{font-weight:600}
+  .hi{color:var(--teal);font-weight:700}
+
+  /* ---------- quality cards ---------- */
+  .qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:6px}
+  .qcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:20px}
+  .qcard .qn{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.08em}
+  .qcard h3{font-family:var(--disp);font-size:15px;font-weight:600;margin:8px 0 8px;letter-spacing:-.01em}
+  .qcard p{font-size:13.5px;color:var(--muted);line-height:1.65}
+  .qcard .flag{font-family:var(--mono);font-size:12px;font-weight:600;margin-top:11px;
+    padding:6px 10px;border-radius:6px;display:inline-block}
+  .flag.f1{background:rgba(224,137,31,.12);color:#b56e12}
+  .flag.f2{background:rgba(220,61,67,.1);color:var(--hr)}
+  .flag.f3{background:rgba(46,111,242,.1);color:var(--spo2)}
+
+  .callout{margin-top:22px;background:linear-gradient(180deg,#f4f8f8,#eef4f4);
+    border:1px solid #cfe2e1;border-left:3px solid var(--teal);
+    border-radius:10px;padding:20px 24px}
+  .callout .ct{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--teal);margin-bottom:9px}
+  .callout p{font-size:14.5px;color:#2b3942}
+
+  /* ---------- learnings ---------- */
+  .learn{list-style:none;display:flex;flex-direction:column;gap:16px;margin-top:6px}
+  .learn li{display:grid;grid-template-columns:32px 1fr;gap:16px;align-items:start}
+  .learn .ln{font-family:var(--mono);font-size:12px;color:var(--faint);padding-top:2px}
+  .learn h3{font-family:var(--disp);font-size:15px;font-weight:600;margin-bottom:3px}
+  .learn p{font-size:14px;color:var(--muted)}
+
+  /* ---------- stack ---------- */
+  .stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{font-family:var(--mono);font-size:12px;padding:6px 13px;border:1px solid var(--line);
+    border-radius:20px;background:var(--panel);color:#3a4650}
+  .chip.acc{border-color:var(--teal);color:var(--teal)}
+
+  footer{padding:34px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--faint);letter-spacing:.03em}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    .sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);
+      padding:30px clamp(24px,5vw,40px)}
+    .sb-nav{display:none}
+    .main{padding:0 clamp(24px,5vw,40px) 70px}
+    .code2{grid-template-columns:1fr}
+    .qgrid{grid-template-columns:1fr}
+    .vitals{grid-template-columns:repeat(2,1fr)}
+    .vital:nth-child(2){border-right:0}
+    .vital:nth-child(-n+2){border-bottom:1px solid #1c2831}
+    .prow{grid-template-columns:1fr auto;gap:8px 14px}
+    .prow .pthr{grid-column:1/-1;margin-top:-6px}
+    .bar{grid-column:1/-1;order:5}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .ecg-line{animation:none}
+    html{scroll-behavior:auto}
+  }
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sb-eyebrow">Data Project · 05</div>
+    <div class="sb-name">웨어러블 생체 데이터<br>저장 &amp; 이상 탐지</div>
+    <div class="sb-meta">
+      <div>Role<b>데이터 적재 · 분석 · 품질검증</b></div>
+      <div>Dataset<b>생체 신호 5,000건 / 15열</b></div>
+      <div>Storage<b>MySQL · MongoDB (이중 구축)</b></div>
+      <div>Stack<b>Python · SQLAlchemy · PyMongo</b></div>
+    </div>
+    <nav class="sb-nav">
+      <a href="#overview"><span>01</span>문제 정의</a>
+      <a href="#arch"><span>02</span>아키텍처</a>
+      <a href="#impl"><span>03</span>핵심 구현</a>
+      <a href="#result"><span>04</span>이상 탐지 결과</a>
+      <a href="#activity"><span>05</span>활동별 패턴</a>
+      <a href="#quality"><span>06</span>데이터 품질 검증</a>
+      <a href="#learn"><span>07</span>배운 점</a>
+    </nav>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="kicker">Wearable Biometric Pipeline</div>
+      <h1>생체 신호를 저장하고, 위험을 읽어내다</h1>
+      <p class="lede">웨어러블 센서 데이터 5,000건을 관계형·문서형 DB에 이중 적재하고,
+        규칙 기반 이상 탐지로 고심박·발열·저산소 신호를 판별한 헬스케어 데이터 분석 프로젝트.</p>
+
+      <!-- 환자 모니터 시그니처 -->
+      <div class="monitor" role="img" aria-label="생체 신호 모니터 요약: 데이터 5000건, DB 2종, 분석 10건, 복합 위험군 832건">
+        <div class="mon-bar">
+          <span class="mon-dot"></span>
+          <span class="mon-label">Live Feed · <b>biometric_wearable_dataset.csv</b></span>
+        </div>
+        <div class="ecg">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true">
+            <g class="ecg-line">
+              <path d="M0,60 L78,60 L86,55 L94,60 L106,60 L110,67 L118,60 L122,20 L128,95 L134,60 L140,60 L158,51 L174,60 L200,60 L200,60 L278,60 L286,55 L294,60 L306,60 L310,67 L318,60 L322,20 L328,95 L334,60 L340,60 L358,51 L374,60 L400,60 L400,60 L478,60 L486,55 L494,60 L506,60 L510,67 L518,60 L522,20 L528,95 L534,60 L540,60 L558,51 L574,60 L600,60 L600,60 L678,60 L686,55 L694,60 L706,60 L710,67 L718,60 L722,20 L728,95 L734,60 L740,60 L758,51 L774,60 L800,60 L800,60 L878,60 L886,55 L894,60 L906,60 L910,67 L918,60 L922,20 L928,95 L934,60 L940,60 L958,51 L974,60 L1000,60 L1000,60 L1078,60 L1086,55 L1094,60 L1106,60 L1110,67 L1118,60 L1122,20 L1128,95 L1134,60 L1140,60 L1158,51 L1174,60 L1200,60"
+                stroke="#3ee0b0" stroke-width="2" transform="translate(0,0)"/>
+              <path d="M0,60 L78,60 L86,55 L94,60 L106,60 L110,67 L118,60 L122,20 L128,95 L134,60 L140,60 L158,51 L174,60 L200,60 L200,60 L278,60 L286,55 L294,60 L306,60 L310,67 L318,60 L322,20 L328,95 L334,60 L340,60 L358,51 L374,60 L400,60 L400,60 L478,60 L486,55 L494,60 L506,60 L510,67 L518,60 L522,20 L528,95 L534,60 L540,60 L558,51 L574,60 L600,60 L600,60 L678,60 L686,55 L694,60 L706,60 L710,67 L718,60 L722,20 L728,95 L734,60 L740,60 L758,51 L774,60 L800,60 L800,60 L878,60 L886,55 L894,60 L906,60 L910,67 L918,60 L922,20 L928,95 L934,60 L940,60 L958,51 L974,60 L1000,60 L1000,60 L1078,60 L1086,55 L1094,60 L1106,60 L1110,67 L1118,60 L1122,20 L1128,95 L1134,60 L1140,60 L1158,51 L1174,60 L1200,60"
+                stroke="#3ee0b0" stroke-width="2" transform="translate(1200,0)"/>
+            </g>
+          </svg>
+        </div>
+        <div class="vitals">
+          <div class="vital"><div class="vt">Records</div><div class="vv">5,000</div><div class="vu">rows · 15 cols</div></div>
+          <div class="vital"><div class="vt">Databases</div><div class="vv">2<small>종</small></div><div class="vu">SQL · NoSQL</div></div>
+          <div class="vital"><div class="vt">Analyses</div><div class="vv">10<small>건</small></div><div class="vu">dual-query</div></div>
+          <div class="vital"><div class="vt">복합 위험군</div><div class="vv" style="color:#ff8a8f">832</div><div class="vu">HR&gt;150 &amp; ≥38°C</div></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 OVERVIEW -->
+    <section id="overview">
+      <div class="sec-head"><span class="sec-num">01</span><h2>문제 정의</h2></div>
+      <p>웨어러블 기기는 심박수·산소포화도·체온을 초 단위로 수집한다. 이 데이터를
+        <strong>어디에 저장하고, 어떤 기준으로 "위험"을 판별할 것인가</strong>가
+        헬스케어 데이터 파이프라인의 출발점이다. 이 프로젝트는 두 계층을 동시에 다뤘다.</p>
+      <p>① <strong>저장 계층</strong> — 동일 데이터를 관계형(MySQL)과 문서형(MongoDB)에 각각 적재해 두 패러다임의 조회 방식을 비교했다.
+        ② <strong>분석 계층</strong> — 저장된 데이터에서 임상적으로 의미 있는 이상 신호를 규칙 기반으로 탐지하고, 그 결과의 타당성까지 역검증했다.</p>
+    </section>
+
+    <!-- 02 ARCHITECTURE -->
+    <section id="arch">
+      <div class="sec-head"><span class="sec-num">02</span><h2>아키텍처</h2></div>
+      <p class="sec-sub">같은 데이터를 두 DB에 적재해, 동일 분석을 "관계형 쿼리"와 "문서형 집계 파이프라인" 두 방식으로 구현했다.</p>
+      <div class="arch">
+        <div class="node">
+          <div class="nlab">Source</div>
+          <div class="nval">CSV 로드</div>
+          <div class="nsub">Pandas · 5,000 rows</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="grp">
+          <div class="node">
+            <div class="nlab">Relational</div>
+            <div class="nval">MySQL</div>
+            <div class="nsub">SQLAlchemy · to_sql</div>
+          </div>
+          <div class="node">
+            <div class="nlab">Document</div>
+            <div class="nval">MongoDB</div>
+            <div class="nsub">PyMongo · insert_many</div>
+          </div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="node">
+          <div class="nlab">Analyze</div>
+          <div class="nval">이상 탐지 · 품질검증</div>
+          <div class="nsub">select / $group</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 IMPLEMENTATION -->
+    <section id="impl">
+      <div class="sec-head"><span class="sec-num">03</span><h2>핵심 구현 — 하나의 분석, 두 개의 쿼리</h2></div>
+      <p class="sec-sub">활동별 평균 생체지표를 SQLAlchemy Core와 MongoDB Aggregation 두 방식으로 구현하고 결과 일치를 검증했다.
+        <code style="color:var(--teal)">GROUP BY = $group</code>, <code style="color:var(--teal)">WHERE = $match</code>의 대응 관계를 직접 매핑했다.</p>
+      <div class="code2">
+        <div class="code">
+          <div class="code-h"><span class="cn">SQLAlchemy Core</span><span class="cb rel">Relational</span></div>
+          <pre><code><span class="f">select</span>(
+    biometric.c.activity,
+    <span class="f">func.avg</span>(biometric.c.heart_rate),
+    <span class="f">func.avg</span>(biometric.c.step_count),
+).<span class="f">group_by</span>(
+    biometric.c.activity
+)</code></pre>
+        </div>
+        <div class="code">
+          <div class="code-h"><span class="cn">MongoDB Aggregation</span><span class="cb doc">Document</span></div>
+          <pre><code>col.<span class="f">aggregate</span>([
+  {<span class="s">"$group"</span>: {
+    <span class="s">"_id"</span>: <span class="s">"$activity"</span>,
+    <span class="s">"avg_hr"</span>: {<span class="s">"$avg"</span>: <span class="s">"$heart_rate"</span>},
+    <span class="s">"avg_step"</span>: {<span class="s">"$avg"</span>: <span class="s">"$step_count"</span>},
+  }},
+  {<span class="s">"$sort"</span>: {<span class="s">"_id"</span>: <span class="k">1</span>}},
+])</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 RESULTS -->
+    <section id="result">
+      <div class="sec-head"><span class="sec-num">04</span><h2>건강 이상 탐지 결과</h2></div>
+      <p class="sec-sub">규칙 기반 임계값으로 각 생체 신호의 이상 구간을 탐지했다. 막대는 전체 5,000건 대비 비율.</p>
+      <div class="panel">
+        <div class="prow">
+          <div class="plab"><span class="swatch" style="background:var(--hr)"></span>고심박</div>
+          <div class="pthr">heart_rate &gt; 150</div>
+          <div class="bar"><i style="width:23.6%;background:var(--hr)"></i></div>
+          <div class="pcnt">1,179<small>23.6%</small></div>
+        </div>
+        <div class="prow">
+          <div class="plab"><span class="swatch" style="background:var(--temp)"></span>발열</div>
+          <div class="pthr">body_temp ≥ 38°C</div>
+          <div class="bar"><i style="width:34.7%;background:var(--temp)"></i></div>
+          <div class="pcnt">1,737<small>34.7%</small></div>
+        </div>
+        <div class="prow">
+          <div class="plab"><span class="swatch" style="background:var(--spo2)"></span>저산소</div>
+          <div class="pthr">blood_oxygen &lt; 94%</div>
+          <div class="bar"><i style="width:41%;background:var(--spo2)"></i></div>
+          <div class="pcnt">2,050<small>41.0%</small></div>
+        </div>
+        <div class="prow">
+          <div class="plab"><span class="swatch" style="background:var(--muted)"></span>센서 오류</div>
+          <div class="pthr">is_tampered = 1</div>
+          <div class="bar"><i style="width:15.2%;background:var(--muted)"></i></div>
+          <div class="pcnt">760<small>15.2%</small></div>
+        </div>
+        <div class="prow">
+          <div class="plab"><span class="swatch" style="background:linear-gradient(90deg,var(--hr),var(--temp))"></span>복합 위험군</div>
+          <div class="pthr">고심박 AND 발열</div>
+          <div class="bar"><i style="width:16.6%;background:linear-gradient(90deg,var(--hr),var(--temp))"></i></div>
+          <div class="pcnt">832<small>16.6%</small></div>
+        </div>
+        <div class="panel-foot"><b>복합 위험군</b> — 심박수 150 초과 + 체온 38°C 이상 동시 발생. 평균 심박 164 bpm · 평균 체온 39.4°C로 단일 지표보다 신뢰도 높은 경보 기준을 제시.</div>
+      </div>
+    </section>
+
+    <!-- 05 ACTIVITY -->
+    <section id="activity">
+      <div class="sec-head"><span class="sec-num">05</span><h2>활동별 패턴 &amp; 이상치 제거 검증</h2></div>
+      <table>
+        <thead><tr><th>활동</th><th>평균 심박수</th><th>평균 걸음수</th><th>걸음수 합계</th></tr></thead>
+        <tbody>
+          <tr><td>Resting</td><td>121.4</td><td>98.8</td><td>236,914</td></tr>
+          <tr><td>Walking</td><td>119.3</td><td class="hi">101.5</td><td class="hi">265,242</td></tr>
+          <tr><td>Cycling</td><td>119.1</td><td>97.9</td><td>244,472</td></tr>
+          <tr><td>Running</td><td>118.2</td><td>99.0</td><td>246,790</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <div class="ct">이상치 제거 전후 비교</div>
+        <p>센서 오류 행 제거 전후 평균이 거의 변하지 않았다 (심박 119.49 → 119.88, 체온 37.53 → 37.48).
+          이는 오류가 특정 구간에 몰리지 않고 <strong>무작위로 분포</strong>함을 뜻한다 — 체계적 편향이 아닌 랜덤 노이즈임을 수치로 규명했다.</p>
+      </div>
+    </section>
+
+    <!-- 06 DATA QUALITY -->
+    <section id="quality">
+      <div class="sec-head"><span class="sec-num">06</span><h2>데이터 품질 검증 <span style="font-family:var(--mono);font-size:12px;color:var(--teal);letter-spacing:.05em;">★ 차별점</span></h2></div>
+      <p class="sec-sub">쿼리 결과를 나열하는 데 그치지 않고, 결과의 <strong>타당성</strong>을 역검증하는 과정에서 데이터 신뢰성의 한계를 발견했다.</p>
+      <div class="qgrid">
+        <div class="qcard">
+          <div class="qn">FINDING 01</div>
+          <h3>불가능한 관측값</h3>
+          <p>체온 이상치 최댓값이 48.7°C — 인체에서 나올 수 없는 값. 실서비스라면 상한 클리핑·결측 처리가 필요한 구간.</p>
+          <span class="flag f1">max 48.7°C</span>
+        </div>
+        <div class="qcard">
+          <div class="qn">FINDING 02</div>
+          <h3>활동–심박수 무상관</h3>
+          <p>Running(118)과 Resting(121)의 평균 심박이 사실상 동일. 운동 시 상승해야 할 심박이 반응하지 않아 합성 데이터 가능성을 시사.</p>
+          <span class="flag f2">Δ ≈ 3 bpm</span>
+        </div>
+        <div class="qcard">
+          <div class="qn">FINDING 03</div>
+          <h3>과도한 이상치 비율</h3>
+          <p>저산소 41%·발열 35% 등 비율이 비현실적으로 높음. 임계값 튜닝 없이 규칙을 적용하면 대량의 거짓 경보가 발생함을 진단.</p>
+          <span class="flag f3">SpO₂ 41%</span>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="ct">Insight</div>
+        <p>분석 파이프라인이 정확히 동작하더라도, 입력 데이터의 신뢰성이 검증되지 않으면 결과 해석은 무의미하다.
+          "쿼리를 잘 짜는 것"만큼 <strong>"결과가 현실적으로 말이 되는지 되묻는 것"</strong>이 데이터 품질 관리의 핵심임을 확인한 사례.</p>
+      </div>
+    </section>
+
+    <!-- 07 LEARNINGS -->
+    <section id="learn">
+      <div class="sec-head"><span class="sec-num">07</span><h2>배운 점 &amp; 트러블슈팅</h2></div>
+      <ul class="learn">
+        <li><span class="ln">A</span><div>
+          <h3>이종 DB 조회 패러다임 매핑</h3>
+          <p>SQL의 SELECT-WHERE-GROUP BY-ORDER BY가 MongoDB의 $project-$match-$group-$sort에 어떻게 대응되는지 직접 구현하며 체득.</p>
+        </div></li>
+        <li><span class="ln">B</span><div>
+          <h3>MongoDB 필드 순서 제어</h3>
+          <p>집계 결과의 필드 순서가 유지되지 않는 문제를 <code style="font-family:var(--mono);font-size:13px">OrderedDict</code>·<code style="font-family:var(--mono);font-size:13px">bson.SON</code>으로 명시적으로 해결.</p>
+        </div></li>
+        <li><span class="ln">C</span><div>
+          <h3>규칙 기반 이상 탐지의 한계</h3>
+          <p>고정 임계값은 구현이 단순하지만 데이터 분포에 따라 오탐이 폭증할 수 있음을 수치로 확인.</p>
+        </div></li>
+      </ul>
+      <div class="stack">
+        <span class="chip">Python</span>
+        <span class="chip">Pandas</span>
+        <span class="chip">SQLAlchemy</span>
+        <span class="chip">MySQL</span>
+        <span class="chip">PyMongo</span>
+        <span class="chip">MongoDB</span>
+        <span class="chip acc">이상 탐지</span>
+        <span class="chip acc">Data Quality</span>
+      </div>
+    </section>
+
+    <footer>OZ 코딩스쿨 AI 헬스케어 부트캠프 · 5일차 프로젝트</footer>
+
+  </main>
+</div>
+</body>
+</html>
