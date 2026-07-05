@@ -243,18 +243,6 @@
     </div>
   </section>
 
-  <section>
-    <div class="sec-head"><span class="idx">06</span><h2>방문 기록</h2></div>
-    <form class="visitor-form" onsubmit="addVisit(event)">
-      <div class="visitor-inputs">
-        <input type="text" id="visitor-name" placeholder="이름" required>
-        <input type="text" id="visitor-msg" placeholder="한마디 남겨주세요">
-        <button type="submit">기록하기</button>
-      </div>
-    </form>
-    <ul class="visitor-log" id="visitor-log"></ul>
-  </section>
-
   <footer>
     <span>LAST_UPDATED · 2026-07-02</span>
     <span>&#169; 한금준</span>
@@ -262,21 +250,5 @@
 
 </div>
 
-<script>
-  function addVisit(e) {
-    e.preventDefault();
-    const name = document.getElementById('visitor-name').value.trim();
-    const msg  = document.getElementById('visitor-msg').value.trim();
-    if (!name) return;
-
-    const now = new Date().toLocaleString('ko-KR', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
-    const li = document.createElement('li');
-    li.innerHTML = `<span class="v-name">${name}</span><span class="v-msg">${msg || '—'}</span><span class="v-time">${now}</span>`;
-    document.getElementById('visitor-log').prepend(li);
-
-    document.getElementById('visitor-name').value = '';
-    document.getElementById('visitor-msg').value = '';
-  }
-</script>
 </body>
 </html>
