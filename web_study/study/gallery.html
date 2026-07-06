@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML & CSS 테스트 페이지</title>
+
+    <style> 
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            grid-template-areas: 
+                "img1 img3 img3"
+                "img1 img4 img6"
+                "img2 img2 img6"
+                "img5 img5 img5"
+        }
+
+        .img1 {
+            grid-area: img1;
+        }
+        .img2 {
+            grid-area: img2;
+        }
+        .img3 {
+            grid-area: img3;
+        }
+        .img4 {
+            grid-area: img4;
+        }
+        .img5 {
+            grid-area: img5;
+        }
+        .img6 {
+            grid-area: img6;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .container:hover .item img:not(:hover) {
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+        
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="item img1">
+            <img src="https://i.pinimg.com/736x/ba/ff/bc/baffbcad6bcf1e86b569f71368ab4971.jpg">
+        </div>
+        <div class="item img2">
+            <img src="https://i.pinimg.com/736x/3b/d0/f8/3bd0f83030814880e738596aebaabe26.jpg">
+        </div>
+        <div class="item img3">
+            <img src="https://i.pinimg.com/1200x/28/03/27/2803279b3a714e6ec70d179187c0447d.jpg">
+        </div>
+        <div class="item img4">
+            <img src="https://i.pinimg.com/736x/ff/2e/49/ff2e490bb6e45c0e9d5317c692a5009a.jpg">
+        </div>
+        <div class="item img5">
+            <img src="https://i.pinimg.com/1200x/3f/44/41/3f4441a7d52f1e47ff793683a0f07499.jpg">
+        </div>
+        <div class="item img6">
+            <img src="https://i.pinimg.com/736x/a4/3e/44/a43e448c384f5b47d92d66eadbf3fa1c.jpg">
+        </div>
+    </div>
+</body>
+</html>

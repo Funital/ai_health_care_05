@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML & CSS 테스트 페이지</title>
+
+    <style> 
+        .container {
+            display: flex;
+        }
+
+        .box {
+            text-align: center;
+            background-color: lightblue;
+            border: 1px solid #000;
+            flex: 1;
+        }
+
+        @media (max-width: 250) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="box">이력서</div>
+        <div class="box">포트폴리오</div>
+        <div class="box">사진첩</div>
+    </div>
+</body>
+</html>
