@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button>
+        Confirm
+    </button>
+    <script>
+        // button 태그 선택
+        const button = document.querySelector('button');
+        
+        // 버튼 클릭 시 실행할 함수
+        function clickButton(){
+            alert('버튼이 클릭되었습니다.');
+        }
+
+        // 버튼에 클릭 이벤트 리스너 추가
+        button.addEventListener('click', clickButton);
+    </script>
+</body>
+</html>

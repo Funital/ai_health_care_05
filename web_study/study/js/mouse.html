@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>마우스 이벤트1</p>
+
+    <script>
+        const p = document.querySelector('p');
+
+        // 마우스 이벤트 함수
+        function highlightText(event) {
+           p.style.color = 'red';
+           p.style.textDecoration = 'underline';
+        }
+
+        function dehighlightText(event) {
+            p.style.color = 'black';
+            p.style.textDecoration = 'none';
+        }
+        
+        p.addEventListener('mouseover', highlightText);
+        p.addEventListener('mouseout', dehighlightText);
+
+    </script>
+
+    <h3>마우스 이벤트2</h3>
+
+    <script>
+        const q = document.querySelector('h3');
+
+        // 마우스 이벤트 함수
+        function colorText(color) {
+           q.style.color = color;
+        }
+        
+        q.addEventListener('mouseover', () => colorText('orange'));
+        q.addEventListener('mouseout', () => colorText('black'));
+
+    </script>
+</body>
+</html>

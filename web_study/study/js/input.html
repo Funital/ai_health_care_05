@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="text" id="name-input" placeholder="이름을 입력하세요">
+    <button>Submit</button>
+
+    <script>
+        // // input 태그 선택
+        const input = document.querySelector('#name-input');
+        const button = document.querySelector('button');
+
+        // // 버튼 클릭 시 실행할 함수
+        function submitName() {
+            //     const p = document.createElement('p');
+            //     p.textContent = `입력된 이름: ${input.value}`;
+            //     document.body.appendChild(p);
+            // }
+
+            // // 버튼에 클릭 이벤트 리스너 추가
+            // button.addEventListener('click', submitName);
+            if (input.value === '') {
+                alert('이름을 입력해주세요.');
+                return;
+            }
+
+            const p = document.createElement('p');
+            p.textContent = `입력된 이름: ${input.value}`;
+            document.body.appendChild(p);
+        }
+        button.addEventListener('click', submitName);
+    </script>
+</body>
+
+</html>
