@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <!-- <link rel="script" href="timer.js"> -->
+</head>
+<body>
+    <button>카운트다운 시작</button>
+    <p></p>
+
+    <script>
+        const button = document.querySelector('button');
+        const p = document.querySelector('p');
+
+        let timer = 10;
+
+        button.addEventListener('click', () => {
+            button.disabled = true;
+
+            p.textContent = timer;
+
+            const timerId = setInterval(
+                () => {
+                    timer--;
+                    p.textContent = timer;
+                    if (timer === 0) {
+                        clearInterval(timerId);
+                        timer = 10;
+                        button.disabled = false;
+                    }
+                },
+                1000
+            )
+        });
+    </script>
+
+</body>
+</html>

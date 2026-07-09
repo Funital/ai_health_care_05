@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage</title>
+    <link rel="stylesheet" href="storage.css">
+</head>
+<body> 
+    <input type="text" placeholder="이름 입력">
+    <button id="save">저장</button>
+    <button id="delete">삭제</button>
+    <p></p>
+
+    <script>
+        // 저장 버튼 누르면 input tag에 입력한 값을 p 태그 출력
+        const input = document.querySelector('input');
+        const saveButton = document.querySelector('#save');
+        const deleteButton = document.querySelector('#delete');
+        const p = document.querySelector('p');
+
+        function welcomeText(name) {
+            return `안녕하세요, ${name}님!`;
+        }
+
+        const savedName = localStorage.getItem('name'); // 스토리지에 저장된 값 가져오기
+
+        if (savedName) p.textContent = welcomeText(savedName); // 스토리지에 값이 있으면 p 태그에 출력
+
+        saveButton.addEventListener('click', () => {
+            localStorage.setItem('name', input.value);  // 스토리지 저장.
+            p.textContent = welcomeText(input.value); // p 태그에 출력
+        });
+
+        deleteButton.addEventListener('click', () => {
+            localStorage.removeItem('name');  // 스토리지 삭제
+            p.textContent = ''; // p 태그에 출력
+        });
+    </script>
+</body> 
+</html>
