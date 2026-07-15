@@ -1,5 +1,7 @@
 from fastapi import Body, FastAPI, HTTPException, Path, Query
 
+from connection import SessionFactory
+from models import User
 from schema import UserSignUpRequest, UserResponse, UserUpdateRequest
 
 app = FastAPI()
@@ -58,6 +60,8 @@ users: list[dict[str, int | str]] = [
     status_code=200
 )
 def get_all_users_handler():
+    session = SessionFactory()
+    users = session.query(User).all()
     return users
 
 @app.get(
@@ -98,13 +102,12 @@ def search_users_handler(
 def user_signup_handler(
     body: UserSignUpRequest
 ):
-    new_user = {
-        "id": len(users) + 1,
-        "username": body.username,
-        "email": body.email,
-        "password": "default_password"
-    }
-    users.append(new_user)
+    new_user = User(username=body.username, email=body.email, password=body.password)
+
+    session = SessionFactory()
+    session.add(new_user)
+    session.commit()
+    session.close()
     return new_user
 
 @app.patch(
