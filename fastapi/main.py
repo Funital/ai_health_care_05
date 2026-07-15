@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Path, Query
+from fastapi import Body, FastAPI, HTTPException, Path, Query
 
-from schema import UserSignUpRequest, UserResponse
+from schema import UserSignUpRequest, UserResponse, UserUpdateRequest
 
 app = FastAPI()
 
@@ -61,6 +61,18 @@ def get_all_users_handler():
     return users
 
 @app.get(
+    "/users/{user_id}",
+    summary="사용자 조회 api",
+    response_model=UserResponse,
+    status_code=200
+)
+def get_user_handler(user_id: int = Path(..., ge=1)):
+    for user in users:
+        if user["id"] == user_id:
+            return user
+    raise HTTPException(status_code=404, detail="User not found")
+
+@app.get(
     "/users/search",
     summary="사용자 검색 api",
     response_model=list[UserResponse]
@@ -76,3 +88,55 @@ def search_users_handler(
         if name in user["username"]:
             result.append(user)
     return result
+
+@app.post(
+    "/users",
+    summary="회원가입 api",
+    response_model=UserResponse,
+    status_code=201
+)
+def user_signup_handler(
+    body: UserSignUpRequest
+):
+    new_user = {
+        "id": len(users) + 1,
+        "username": body.username,
+        "email": body.email,
+        "password": "default_password"
+    }
+    users.append(new_user)
+    return new_user
+
+@app.patch(
+    "/users/{user_id}",
+    summary="사용자 정보 수정 api",
+    response_model=UserResponse,
+    status_code=200
+)
+def update_user_handler(
+    user_id: int = Path(..., ge=1),
+    body: UserUpdateRequest = Body(...),
+):
+    for user in users:
+        if user["id"] == user_id:
+            if body.username is not None:
+                user["username"] = body.username
+            if body.email is not None:
+                user["email"] = body.email
+            return user
+    raise HTTPException(status_code=404, detail="User not found")
+
+@app.delete(
+    "/users/{user_id}",
+    summary="사용자 삭제 api",
+    response_model=None,
+    status_code=204
+)
+def delete_user_handler(
+    user_id: int = Path(..., ge=1)
+):
+    for user in users:
+        if user["id"] == user_id:
+            users.remove(user)
+            return
+    raise HTTPException(status_code=404, detail="User not found")
