@@ -12,6 +12,7 @@ class UserUpdateRequest(BaseModel):
     email: str | None = Field(None, email=True)
 
 class UserResponse(BaseModel):
+
     id: int
     username: str = Field(..., min_length=2, max_length=100)
-    email: EmailStr = Field(...)
+    email: str = Field(...)

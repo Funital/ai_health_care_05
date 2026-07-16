@@ -1,3 +1,5 @@
+from sqlalchemy import select
+
 from fastapi import Body, FastAPI, HTTPException, Path, Query
 
 from connection import SessionFactory
@@ -60,21 +62,10 @@ users: list[dict[str, int | str]] = [
     status_code=200
 )
 def get_all_users_handler():
-    session = SessionFactory()
-    users = session.query(User).all()
-    return users
-
-@app.get(
-    "/users/{user_id}",
-    summary="사용자 조회 api",
-    response_model=UserResponse,
-    status_code=200
-)
-def get_user_handler(user_id: int = Path(..., ge=1)):
-    for user in users:
-        if user["id"] == user_id:
-            return user
-    raise HTTPException(status_code=404, detail="User not found")
+    stmt = select(User)
+    with SessionFactory() as session:   # 자동 close
+        users = session.execute(stmt).scalars().all()
+        return users
 
 @app.get(
     "/users/search",
@@ -84,14 +75,29 @@ def get_user_handler(user_id: int = Path(..., ge=1)):
 def search_users_handler(
     name: str | None = Query(None)
 ):
-    result = []
     if name is None:
-        return result
-    
-    for user in users:
-        if name in user["username"]:
-            result.append(user)
-    return result
+        return []
+
+    stmt = select(User).where(User.username.contains(name))
+    with SessionFactory() as session:   # 자동 close
+        users = session.execute(stmt).scalars().all()
+        return users
+
+@app.get(
+    "/users/{user_id}",
+    summary="사용자 조회 api",
+    response_model=UserResponse,
+    status_code=200
+)
+def get_user_handler(user_id: int = Path(..., ge=1)):
+    stmt = select(User).where(User.id == user_id)
+    with SessionFactory() as session:   # 자동 close
+        result = session.execute(stmt)
+        user: User | None = result.scalar()
+
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
 
 @app.post(
     "/users",
@@ -104,11 +110,10 @@ def user_signup_handler(
 ):
     new_user = User(username=body.username, email=body.email, password=body.password)
 
-    session = SessionFactory()
-    session.add(new_user)
-    session.commit()
-    session.close()
-    return new_user
+    with SessionFactory() as session:   # 자동 close
+        session.add(new_user)
+        session.commit()
+        return new_user
 
 @app.patch(
     "/users/{user_id}",
