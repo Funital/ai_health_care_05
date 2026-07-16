@@ -1,0 +1,10 @@
+# Model files (large binary files)
+models/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# DB
+*.db
