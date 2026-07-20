@@ -5,6 +5,7 @@ from llama_cpp import Llama
 from sqlalchemy import select
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, Request
+from fastapi.responses import StreamingResponse
 
 from async_connection import get_async_session
 from models import User
@@ -154,19 +155,33 @@ async def create_chat_handler(
     )
     # 채팅 생성 로직 구현
     # llm = get_llm(request)  # FastAPI의 상태에서 Llama 인스턴스를 가져옴
-    response = llm.create_chat_completion(
-        messages=[
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT
-            },
-            {
-                "role": "user",
-                "content": body.user_input
-            }
-        ],
-        max_tokens=256,
-        temperature=0.7,
+    
+    # answer = response["choices"][0]["message"]["content"]
+
+    # 토큰이 생성될 때마다 토큰을 반환하는 함수
+    def token_generator():
+        response = llm.create_chat_completion(
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT
+                },
+                {
+                    "role": "user",
+                    "content": body.user_input
+                }
+            ],
+            max_tokens=256,
+            temperature=0.7,
+            stream=True # 스트리밍 방식으로 토큰 단위로 반환
+        )
+        for chunk in response:
+            token = chunk["choices"][0]["delta"].get("content")
+            if token:
+                yield token
+
+    return StreamingResponse(
+        # 제너레이터 객체 -> 여러 개의 데이터를 만들어주는 객체
+        token_generator(),
+        media_type="text/event-stream",
     )
-    answer = response["choices"][0]["message"]["content"]
-    return {"answer": answer}
