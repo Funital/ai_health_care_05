@@ -1,18 +1,31 @@
+from contextlib import asynccontextmanager
+
+import anyio
+from llama_cpp import Llama
 from sqlalchemy import select
 
-from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query
+from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, Request
 
-from connection import SessionFactory, get_session
+from async_connection import get_async_session
 from models import User
-from schema import UserSignUpRequest, UserResponse, UserUpdateRequest
+from schema import UserSignUpRequest, UserResponse, UserUpdateRequest, UserInputRequest
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app):
+    limiter = anyio.to_thread.current_default_thread_limiter()
+    limiter.total_tokens = 100
 
-# users: list[dict[str, int | str]] = [
-#     {"id": 1, "username": "user1", "email": "user1@example.com", "password": "password1"},
-#     {"id": 2, "username": "user2", "email": "user2@example.com", "password": "password2"},
-#     {"id": 3, "username": "user3", "email": "user3@example.com", "password": "password3"}
-# ]
+    app.state.llm = Llama(
+        model_path="./models/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+        n_ctx=4096,
+        n_threads=2,
+        verbose=False,   # 로그 찍기
+        chat_format="llama-3",
+    )
+
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get(
     "/users",
@@ -20,16 +33,11 @@ app = FastAPI()
     response_model=list[UserResponse],
     status_code=200
 )
-# def get_all_users_handler():
-#     stmt = select(User)
-#     with SessionFactory() as session:   # 자동 close
-#         users = session.execute(stmt).scalars().all()
-#         return users
-def get_all_users_handler(
-    session = Depends(get_session),
+async def get_all_users_handler(
+    session = Depends(get_async_session),
 ):
     stmt = select(User)
-    result = session.execute(stmt)
+    result = await session.execute(stmt)
     users: list[User] = result.scalars().all()
     return users
 
@@ -38,20 +46,17 @@ def get_all_users_handler(
     summary="사용자 검색 api",
     response_model=list[UserResponse]
 )
-def search_users_handler(
+async def search_users_handler(
     name: str | None = Query(None),
-    session = Depends(get_session)
+    session = Depends(get_async_session)
 ):
     if name is None:
         return []
 
     stmt = select(User).where(User.username.contains(name))
-    result = session.execute(stmt)
+    result = await session.execute(stmt)
     users: list[User] = result.scalars().all()
     return users
-    # with SessionFactory() as session:   # 자동 close
-    #     users = session.execute(stmt).scalars().all()
-    #     return users
 
 @app.get(
     "/users/{user_id}",
@@ -59,33 +64,31 @@ def search_users_handler(
     response_model=UserResponse,
     status_code=200
 )
-def get_user_handler(
+async def get_user_handler(
     user_id: int = Path(..., ge=1),
-    session = Depends(get_session)
+    session = Depends(get_async_session)
 ):
     stmt = select(User).where(User.id == user_id)
-    result = session.execute(stmt)
+    result = await session.execute(stmt)
     user: User | None = result.scalar()
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-    
 @app.post(
     "/users",
     summary="회원가입 api",
     response_model=UserResponse,
     status_code=201
 )
-def user_signup_handler(
+async def user_signup_handler(
     body: UserSignUpRequest,
-    session = Depends(get_session)
+    session = Depends(get_async_session)
 ):
     new_user = User(username=body.username, email=body.email, password=body.password)
-
     session.add(new_user)
-    session.commit()
+    await session.commit()
     return new_user
 
 @app.patch(
@@ -94,13 +97,13 @@ def user_signup_handler(
     response_model=UserResponse,
     status_code=200
 )
-def update_user_handler(
+async def update_user_handler(
     user_id: int = Path(..., ge=1),
     body: UserUpdateRequest = Body(...),
-    session = Depends(get_session)
+    session = Depends(get_async_session)
 ):
     stmt = select(User).where(User.id == user_id)
-    result = session.execute(stmt)
+    result = await session.execute(stmt)
     user: User | None = result.scalar()
 
     if user is None:
@@ -110,7 +113,7 @@ def update_user_handler(
         user.username = body.username
     if body.email is not None:
         user.email = body.email
-    session.commit()
+    await session.commit()
     return user
 
 @app.delete(
@@ -119,16 +122,51 @@ def update_user_handler(
     response_model=None,
     status_code=204
 )
-def delete_user_handler(
+async def delete_user_handler(
     user_id: int = Path(..., ge=1),
-    session = Depends(get_session)
+    session = Depends(get_async_session)
 ):
     stmt = select(User).where(User.id == user_id)
-    result = session.execute(stmt)
+    result = await session.execute(stmt)
     user: User | None = result.scalar()
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-        
-    session.delete(user)
-    session.commit()
+
+    await session.delete(user)
+    await session.commit()
+
+def get_llm(request: Request):
+    return request.app.state.llm
+
+@app.post("/chats")
+async def create_chat_handler(
+    # request: Request,   # Request 객체를 통해 FastAPI의 상태에 접근
+    body: UserInputRequest, # 요청 본문
+    llm = Depends(get_llm)
+    # session = Depends(get_async_session)
+):
+    SYSTEM_PROMPT = (
+        "You are a concise assistant. "
+        "Always reply in the same language as the user's input. "
+        "Do not change the language. "
+        "Do not mix languages."
+    )
+    # 채팅 생성 로직 구현
+    # llm = get_llm(request)  # FastAPI의 상태에서 Llama 인스턴스를 가져옴
+    response = llm.create_chat_completion(
+        messages=[
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT
+            },
+            {
+                "role": "user",
+                "content": body.user_input
+            }
+        ],
+        max_tokens=256,
+        temperature=0.7,
+    )
+    answer = response["choices"][0]["message"]["content"]
+    return {"answer": answer}

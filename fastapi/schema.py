@@ -16,3 +16,6 @@ class UserResponse(BaseModel):
     id: int
     username: str = Field(..., min_length=2, max_length=100)
     email: str = Field(...)
+
+class UserInputRequest(BaseModel):
+    user_input: str
