@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 import anyio
 from llama_cpp import Llama
 from sqlalchemy import select
+from openai import AsyncOpenAI
+from config import settings
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, Request
 from fastapi.responses import StreamingResponse
@@ -23,6 +25,8 @@ async def lifespan(app):
         verbose=False,   # 로그 찍기
         chat_format="llama-3",
     )
+
+    app.state.openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
     yield
 
@@ -185,3 +189,31 @@ async def create_chat_handler(
         token_generator(),
         media_type="text/event-stream",
     )
+
+@app.post("/chat-gpt")
+async def chat_gpt_handler(
+    request: Request,
+    body: UserInputRequest
+):
+    client = request.app.state.openai_client
+
+    async def stream_generator():
+        async with client.responses.stream(
+            model="gpt-4o-mini",
+            input=body.user_input,
+        ) as stream:
+            async for event in stream:
+                if event.type == "response.output_text.delta":
+                    yield event.delta   # 토큰 반환
+                elif event.type == "response.completed":
+                    break
+
+    return StreamingResponse(
+        stream_generator(),
+        media_type="text/event-stream"
+    )
+    # response = await client.responses.create(
+    #     model="gpt-4o-mini",
+    #     input=body.user_input,
+    # )
+    # return {"answer": response.output_text}
