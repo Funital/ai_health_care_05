@@ -8,3 +8,8 @@ __pycache__/
 
 # DB
 *.db
+
+# Environment variables
+.env
+.env.*
+*.env
