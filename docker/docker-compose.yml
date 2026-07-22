@@ -5,6 +5,9 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    depends_on:
+      - db
+      - redis
   db:
     image: mysql:8.4
     environment:
@@ -17,6 +20,8 @@ services:
       context: ./worker
     volumes:
       - ./worker:/app
+    depends_on:
+      - redis
   redis:
     image: redis:8
 
