@@ -1,13 +1,14 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
+
 DATABASE_URL = "sqlite+aiosqlite:///risk_predict.db"
 
 async_engine = create_async_engine(DATABASE_URL)
 
 AsyncSessionFactory = async_sessionmaker(
     bind=async_engine,
-    autocommit=False,
     autoflush=False,
+    autocommit=False,
     expire_on_commit=False
 )
 
