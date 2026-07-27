@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Float, Integer, String, DateTime, func, ForeignKey, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.orm import Base
 
@@ -23,6 +23,8 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
     )
+
+    health_profile = relationship("UserHealthProfile", back_populates="user", uselist=False, lazy="joined")  # uselist=False: 일대일 관계를 나타냄
 
 class UserHealthProfile(Base):
     __tablename__ = "user_health_profile"
@@ -46,4 +48,11 @@ class UserHealthProfile(Base):
     # 회원이 건강 프로필을 등록한 시각(DB에 저장된 시각을 자동 저장)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
+    )
+    user: Mapped["User"] = relationship(
+
+        "User",
+
+        back_populates="health_profile",
+
     )

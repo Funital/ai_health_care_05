@@ -5,7 +5,7 @@ from auth.jwt import create_access_token, verify_user
 from auth.password import hash_password, verify_password
 from database.connection import get_session
 from user.model import User, UserHealthProfile
-from user.schema import UserSignUpRequest, UserSignUpResponse, UserLoginRequest, UserHealthProfileCreateRequest, UserHealthProfileResponse
+from user.schema import UserSignUpRequest, UserResponse, UserLoginRequest, UserHealthProfileCreateRequest, UserHealthProfileResponse
 
 # User 관련된 API 함수를 관리하는 객체
 router = APIRouter(prefix="/user", tags=["User"])
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/user", tags=["User"])
     "",
     summary="회원가입 API",
     status_code=status.HTTP_201_CREATED,
-    response_model=UserSignUpResponse
+    response_model=UserResponse
 )
 async def signup_user_handler(
     body: UserSignUpRequest,
@@ -72,7 +72,7 @@ from fastapi import Header
 @router.get(
     "/me",
     summary="내 정보 조회 API",
-    response_model=UserSignUpResponse,
+    response_model=UserResponse,
     status_code=status.HTTP_200_OK,
 )
 async def get_me_handler(
