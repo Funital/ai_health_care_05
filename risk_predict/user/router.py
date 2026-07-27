@@ -4,9 +4,8 @@ from sqlalchemy import select
 from auth.jwt import create_access_token, verify_user
 from auth.password import hash_password, verify_password
 from database.connection import get_session
-from user.model import User
-from user.model import User
-from user.schema import UserSignUpRequest, UserSignUpResponse, UserLoginRequest
+from user.model import User, UserHealthProfile
+from user.schema import UserSignUpRequest, UserSignUpResponse, UserLoginRequest, UserHealthProfileCreateRequest, UserHealthProfileResponse
 
 # User 관련된 API 함수를 관리하는 객체
 router = APIRouter(prefix="/user", tags=["User"])
@@ -84,4 +83,31 @@ async def get_me_handler(
     result = await session.execute(stmt)
     user = result.scalar()
     return user
-    
+
+@router.post(
+    "/health-profiles",
+    summary="건강 프로필 생성 API",
+    response_model=UserHealthProfileResponse,
+    status_code=status.HTTP_201_CREATED
+)
+async def create_health_profile_handler(
+    body: UserHealthProfileCreateRequest,
+    user_id: int = Depends(verify_user),
+    session = Depends(get_session)
+):
+    stmt = select(UserHealthProfile).where(UserHealthProfile.user_id == user_id)
+    result = await session.execute(stmt)
+    existing_profile = result.scalar()
+    if existing_profile:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="이미 건강 프로필이 존재합니다.")
+    # 새로운 건강 프로필 생성
+    profile_data = body.model_dump()  # Pydantic 모델을 딕셔너리로 변환
+
+    new_profile = UserHealthProfile(
+        user_id=user_id,
+        **profile_data
+    )
+    session.add(new_profile)
+    await session.commit()  
+    await session.refresh(new_profile)
+    return new_profile
