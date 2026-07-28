@@ -1,11 +1,12 @@
 from user.model import UserHealthProfile
 from prediction.model import HealthRiskPrediction
 
+
 def generate_default_system_prompt(
-        profile: UserHealthProfile,
-        prediction: HealthRiskPrediction
+    profile: UserHealthProfile,
+    prediction: HealthRiskPrediction
 ) -> str:
-    message = f"""
+    prompt = f"""
 당신은 사용자의 건강 위험도를 분석하고 생활 습관을 개선하도록 돕는 AI 건강 코치입니다.
 
 현재 사용자의 건강 프로필은 다음과 같습니다.
@@ -25,4 +26,4 @@ def generate_default_system_prompt(
 - 생활 습관 개선 방법을 구체적으로 제안합니다.
 - 사용자의 질문과 이전 대화 내용을 고려하여 일관성 있게 답변합니다.
 """
-    return message
+    return prompt
