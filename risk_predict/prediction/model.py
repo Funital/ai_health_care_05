@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Integer, ForeignKey, Float, String, DateTime, func
+from sqlalchemy import Integer, ForeignKey, Float, String, DateTime, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.orm import Base
@@ -18,6 +18,7 @@ class HealthRiskPrediction(Base):
 
     diabetes_probability: Mapped[float] = mapped_column(Float)
     hypertension_probability: Mapped[float] = mapped_column(Float)
+    summary: Mapped[str] = mapped_column(Text, nullable=True)
     model_version: Mapped[str] = mapped_column(String(50))
     
     created_at: Mapped[datetime] = mapped_column(

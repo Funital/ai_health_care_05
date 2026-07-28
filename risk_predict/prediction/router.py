@@ -45,6 +45,7 @@ async def predict_health_risk_handler(
         user_id=user_id,
         diabetes_probability=result.diabetes_probability,
         hypertension_probability=result.hypertension_probability,
+        summary=result.summary,
         model_version=body.model_version
     )
     session.add(new_prediction)

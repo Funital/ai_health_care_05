@@ -20,15 +20,6 @@ class UserHealthProfileCreateRequest(BaseModel):
 
 
 # response
-class UserResponse(BaseModel):
-    id: int
-    email: str
-    created_at: datetime
-    health_profile: UserHealthProfileResponse | None
-
-    # 객체를 읽을 때, 속성 읽기(.attr) 허용
-    model_config = ConfigDict(from_attributes=True)
-
 class UserHealthProfileResponse(BaseModel):
     id: int
     user_id: int
@@ -38,3 +29,12 @@ class UserHealthProfileResponse(BaseModel):
     smoking: bool
     exercise_per_week: int
     created_at: datetime
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    created_at: datetime
+    health_profile: UserHealthProfileResponse | None
+
+    # 객체를 읽을 때, 속성 읽기(.attr) 허용
+    model_config = ConfigDict(from_attributes=True)
