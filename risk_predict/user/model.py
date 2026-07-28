@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Float, Integer, String, DateTime, func, ForeignKey, Boolean
+from sqlalchemy import Integer, String, DateTime, ForeignKey, Float, Boolean, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.orm import Base
@@ -21,38 +21,31 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(256))
     # 회원이 가입한 시각(DB에 저장된 시각을 자동 저장)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now()
+        DateTime, server_default=func.now() 
     )
 
-    health_profile = relationship("UserHealthProfile", back_populates="user", uselist=False, lazy="joined")  # uselist=False: 일대일 관계를 나타냄
+    health_profile = relationship(
+        "UserHealthProfile",
+        uselist=False,  # 일대일 관계
+        lazy="joined",  # User를 조회할 때, JOIN으로 HealthProfile 함께 조회
+    )
+
 
 class UserHealthProfile(Base):
     __tablename__ = "user_health_profile"
 
-    # 기본키 id 컬럼 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True
     )
-    # user_id 컬럼(외래키)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), unique=True)    # unique=True: 한 명의 회원이 하나의 건강 프로필만 가질 수 있도록 설정
-    # 나이 컬럼
+    # 프로필의 소유주(user)를 나타내는 외래키(FK) - 일대일 관계(unique)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), unique=True)
+
     age: Mapped[int] = mapped_column(Integer)
-    # 키 컬럼
-    height: Mapped[float] = mapped_column(Float)
-    # 몸무게 컬럼
-    weight: Mapped[float] = mapped_column(Float)
-    # 흡연 여부 컬럼
+    height_cm: Mapped[float] = mapped_column(Float)
+    weight_kg: Mapped[float] = mapped_column(Float)
     smoking: Mapped[bool] = mapped_column(Boolean)
-    # 운동 횟수 컬럼(주당 운동 횟수)
     exercise_per_week: Mapped[int] = mapped_column(Integer)
-    # 회원이 건강 프로필을 등록한 시각(DB에 저장된 시각을 자동 저장)
+
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now()
-    )
-    user: Mapped["User"] = relationship(
-
-        "User",
-
-        back_populates="health_profile",
-
+        DateTime, server_default=func.now() 
     )
