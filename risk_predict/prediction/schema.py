@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from prediction.llm import ModelVersion
+from llm import ModelVersion
 
 
 # request

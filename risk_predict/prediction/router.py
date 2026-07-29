@@ -6,7 +6,7 @@ from database.connection import get_session
 from user.model import UserHealthProfile
 
 from prediction.model import HealthRiskPrediction
-from prediction.llm import predict_health_risk
+from llm import predict_health_risk
 from prediction.schema import HealthRiskPredictRequest
 
 
